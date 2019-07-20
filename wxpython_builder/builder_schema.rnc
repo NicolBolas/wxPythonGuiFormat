@@ -1,0 +1,152 @@
+
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+
+#App and main windows.
+div
+{
+    start = bld.root.model
+    
+    bld.root.model =
+        bld.app.elem
+    
+    bld.app.elem =
+        element app { bld.app.contents }
+
+    bld.app.contents =
+        bld.app.attlist,
+        bld.main-wnds.model+
+
+    bld.app.attlist = empty
+    
+    bld.main-wnds.model =
+        bld.frame.elem
+
+
+    bld.frame.elem =
+        ##Main frame window.
+        element frame { bld.frame.contents }
+
+    bld.frame.contents =
+        bld.frame.attlist,
+        bld.frame.containers.model+
+
+    bld.frame.attlist =
+        bld.id.attrib,
+        bld.frame.size.attlist,
+        bld.title.attrib
+
+    bld.frame.size.attlist =
+        ##Requires width and height.
+        bld.width.attrib,
+        bld.height.attrib
+
+    bld.frame.containers.model =
+        bld.panel.elem
+}
+
+##Frame containers
+div
+{
+    bld.panel.elem =
+        ##One of the child elements of a frame, storing arbitrary content.
+        element panel { bld.panel.contents }
+    
+    bld.panel.contents =
+        bld.panel.attlist
+
+    bld.panel.attlist =
+        bld.std.window.attlist,
+        bld.size.opt.attlist,
+        bld.panel.aui.attlist
+
+    bld.panel.aui.attlist =
+        (bld.aui.direction.attrib | bld.aui.center-pane.attrib),
+        bld.aui.common.attlist,
+        bld.aui.maximize-button.attrib?,
+        bld.aui.floatable.attrib?
+
+}
+
+##Common attlists
+div
+{
+    bld.std.window.attlist =
+        bld.tooltip.attrib?,
+        bld.id.attrib?
+
+    bld.size.opt.attlist =
+        bld.width.attrib?,
+        bld.height.attrib?
+        
+    bld.aui.common.attlist =
+        bld.aui.row.attrib?,
+        bld.aui.layer.attrib?,
+        bld.aui.resizeable.attrib?
+
+}
+
+## All attributes.
+div
+{
+    bld.id.attrib =
+        ## Identifier used to find specific windows within a context.
+        attribute id { bld.id.data }
+        
+    bld.width.attrib =
+        attribute width { xsd:positiveInteger }
+
+    bld.height.attrib =
+        attribute height { xsd:positiveInteger }
+        
+    bld.title.attrib =
+        ##The textual title of a window.
+        attribute title { text }
+        
+    bld.tooltip.attrib =
+        ##Tooltip for this window.
+        attribute tooltip { text }
+
+    bld.aui.direction.attrib =
+        ##Specifies which direction this AUI frame-managed window resides on.
+        ##Cannot be used in conjunction with `centerpane`.
+        attribute direction { "right" | "left" | "top" | "bottom" }
+
+    bld.aui.center-pane.attrib =
+        ##Specifies that this panel is the one center pane.
+        ##Use this attribute or a direction, not both.
+        attribute center-pane { "true" }
+
+    bld.aui.maximize-button.attrib =
+        ##Should the panel have a maximize button.
+        [ a:defaultValue = "false" ]
+        attribute maximize-button { bld.boolean.data }
+
+    bld.aui.floatable.attrib =
+        ##True if the panel/toolbar can be made floating.
+        [ a:defaultValue = "true" ]
+        attribute floatable { bld.boolean.data }
+
+    bld.aui.row.attrib =
+        ## Specifies the order for panes attached to the same layer.
+        attribute row { xsd:nonNegativeInteger }
+
+    bld.aui.layer.attrib =
+        ## Determines how close the attached pane is to the center.
+        attribute layer { xsd:nonNegativeInteger }
+
+    bld.aui.resizeable.attrib =
+        ##If true, then the panel or toolbar can be resized. If false, it cannot be resized.
+        ##For panels, this is true by default. For toolbars, it is false by default.
+        attribute resizeable { bld.boolean.data }
+}
+
+## Data types 
+div
+{
+    bld.id.data = text
+    
+    ## XSD's boolean type includes things other than "true" and "false",
+    ## so we do it manually.
+    bld.boolean.data = "true" | "false"
+}
