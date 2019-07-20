@@ -25,7 +25,7 @@ def process_elements(procs, element, context):
     return procs
 
 
-def get_attrib(elem, attrib, default):
+def get_attrib(elem, attrib, default = None):
     value = elem.get(attrib, None)
     if not value:
         return default
@@ -33,11 +33,16 @@ def get_attrib(elem, attrib, default):
 
 
 def get_attrib_bool(elem, attrib, default):
-    value = get_attrib(elem, attrib, default)
+    """`default` is assumed to already be a Python boolean."""
+    value = elem.get(attrib, None)
+    if not value:
+        return default
+
     if(value == "false"):
         return False
     if(value == "true"):
         return True
+
     raise InvalidBooleanAttribute(elem, attrib)
 
 
@@ -49,15 +54,24 @@ def require_attrib(elem, attrib):
     return value
 
 
+def require_attrib_bool(elem, attrib):
+    value = require_attrib(elem, attrib)
+    if(value == "false"):
+        return False
+    if(value == "true"):
+        return True
+    raise InvalidBooleanAttribute(elem, attrib)
+
+
 def get_wnd_size(elem):
     """Use when size is required."""
     return wx.Size(int(require_attrib(elem, "width")),
             int(require_attrib(elem, "height")))
 
 
-def get_wnd_size_optional(elem)
+def get_wnd_size_optional(elem):
     """Use for optional sizes"""
-    width = int(get_attrib_bool(elem, "width", "-1"))
-    height = int(get_attrib_bool(elem, "height", "-1"))
+    width = int(get_attrib(elem, "width", "-1"))
+    height = int(get_attrib(elem, "height", "-1"))
     return wx.Size(width, height)
 

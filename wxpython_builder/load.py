@@ -22,7 +22,81 @@ class _FrameCloser:
     def __call__(self, event):
         self._aui.UnInit()
         self._frame.Destroy()
-        
+
+
+_aui_default_name_ix = None
+
+def _calc_aui_default_name():
+    name = f"__BuilderDefaultPanel__{_aui_default_name_ix}"
+    ++_aui_default_name_ix
+    return name
+
+
+def _get_aui_pane_info(elem):
+    """Parses the AUI info from the element's attributes."""
+    pane_info = wx.aui.AuiPaneInfo()
+    
+    is_toolbar = False
+    if elem.tag == "toolbar":
+        pane_info.Toolbar()
+        is_toolbar = True
+
+    #The pane name can be specified, or taken from the id, or generated.
+    aui_name = get_attrib(elem, "aui-name")
+    if not aui_name:
+        aui_name = get_attrib(elem, "id")
+        if not aui_name:
+            aui_name = _calc_aui_default_name()
+            
+    pane_info.Name(aui_name)
+    
+    title = get_attrib(elem, "title")
+    if title:
+        pane_info.Caption(title)
+    
+    #Handling anchoring direction.
+    anchor = require_attrib(elem, "anchor")
+    if anchor == "top":
+        pane_info.Top()
+    elif anchor == "bottom":
+        pane_info.Bottom()
+    elif anchor == "left":
+        pane_info.Left()
+    elif anchor == "right":
+        pane_info.Right()
+    elif anchor == "center":
+        pane_info.Center()
+    else:
+        raise InvalidAttribValueError(elem, "anchor", anchor)
+
+    row = get_attrib(elem, "row")
+    if row:
+        pane_info.Row(int(row))
+
+    layer = get_attrib(elem, "layer")
+    if layer:
+        pane_info.Layer(int(layer))
+
+    if get_attrib_bool(elem, "maximize-button", False):
+        pane_info.MaximizeButton()
+    
+    pane_info.BestSize(get_wnd_size_optional(elem))
+    pane_info.CloseButton(False)
+    
+    
+    pane_info.Resizable(get_attrib_bool(elem, "resizable", False if is_toolbar else True))
+    
+    if not get_attrib_bool(elem, "gripper", True):
+        if is_toolbar:
+            pane_info.Gripper(False)
+        else:
+            pane_info.CaptionVisible(False)
+    
+    if not get_attrib_bool(elem, "floatable", True):
+        pane_info.Floatable(False)
+    
+    return pane_info
+
 
 class _FrameElemProcs:
     """
@@ -42,17 +116,35 @@ class _FrameElemProcs:
         self._frame.Bind(wx.EVT_CLOSE, _FrameCloser(self._frame, self._aui))
         
         #Contains panels and toolbars.
-        self._panels = []
-        self._id_map = {}
+        self._containers = []
+        
+        #Maps from ID to the actual window.
+        self._id_wnd_map = {}
 
         
     def panel(self, elem):
-        pl = wx.Panel(self._frame)
-        self._panels.append(pl)
+
+        panel_size = get_wnd_size_optional(elem)
+        id = get_attrib(elem, "id")
         
-        panel = self._panels[-1]
-        pane_info = wx.aui.AuiPaneInfo().Center() 
+        #TODO: Compute an AUI-identifier if `id` is not found.
+        aui_id = id
+        
+        panel = wx.Panel(self._frame, size = panel_size)
+        self._containers.append(panel)
+        
+        #TODO: Get and apply sizer information.
+        
+        #Get and apply AUI information.
+        pane_info = _get_aui_pane_info(elem)
         self._aui.AddPane(panel, pane_info)
+
+        if id:
+            if id in self._id_wnd_map:
+                raise MultipleUseOfIdError(id, elem, "frame window")
+            self._id_wnd_map[id] = panel
+        
+        #TODO: Process children.
 
 
 class _RootElemProcs:
@@ -67,9 +159,11 @@ class _RootElemProcs:
     
     
     def frame(self, elem):
+        _aui_default_name_ix = 0
+        
         frame_procs = _FrameElemProcs(elem)
         if frame_procs._id in self._frames:
-            raise MultipleUseOfIdError(frame_procs._id, elem, "main window")
+            raise MultipleUseOfIdError(frame_procs._id, elem, "main application")
 
         self._frames[frame_procs._id] = frame_procs
         

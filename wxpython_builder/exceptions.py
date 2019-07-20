@@ -41,7 +41,12 @@ class InvalidBooleanAttribute(WxPythonBuilderError):
     """Raised for boolean attributes that don't contain a boolean value."""
     
     def __init__(self, elem, attrib):
-        self.message = f"The attribute {attrib} on element {elem.tag} must be exactly 'true' or 'false'"
+        self.message = f"The attribute {attrib} on element {elem.tag} must be either 'true' or 'false'"
     
+
+class InvalidAttribValueError():
+    """Raised for an attribute whose given value is invalid."""
     
+    def __init__(self, elem, attrib, value):
+        self.message = f"The attribute {attrib} on element {elem.tag} has the value '{value}', which is invalid."
     

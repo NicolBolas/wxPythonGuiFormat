@@ -61,7 +61,8 @@ div
         bld.panel.aui.attlist
 
     bld.panel.aui.attlist =
-        (bld.aui.direction.attrib | bld.aui.center-pane.attrib),
+        bld.aui.panel.anchor.attrib,
+        bld.title.attrib?,
         bld.aui.common.attlist,
         bld.aui.maximize-button.attrib?,
         bld.aui.floatable.attrib?
@@ -80,9 +81,11 @@ div
         bld.height.attrib?
         
     bld.aui.common.attlist =
+        bld.aui.aui-name.attrib?,
         bld.aui.row.attrib?,
         bld.aui.layer.attrib?,
-        bld.aui.resizeable.attrib?
+        bld.aui.resizeable.attrib?,
+        bld.aui.gripper.attrib?
 
 }
 
@@ -107,15 +110,20 @@ div
         ##Tooltip for this window.
         attribute tooltip { text }
 
-    bld.aui.direction.attrib =
-        ##Specifies which direction this AUI frame-managed window resides on.
-        ##Cannot be used in conjunction with `centerpane`.
-        attribute direction { "right" | "left" | "top" | "bottom" }
+    bld.aui.aui-name.attrib =
+        ##Specifies the name of the toolbar/panel's aui pane.
+        ##Having a fixed name is important for being able to save the configuration and reloading it.
+        ##If this is not present, the pane uses the `id`, and if that's not present, it generates a
+        ##name based on the number of unnamed panes before it in the frame.
+        attribute aui-name { text }
+        
+    bld.aui.panel.anchor.attrib =
+        ##Specifies the direction the panel is anchored to.
+        attribute anchor {"right" | "left" | "top" | "bottom" | "center" }
 
-    bld.aui.center-pane.attrib =
-        ##Specifies that this panel is the one center pane.
-        ##Use this attribute or a direction, not both.
-        attribute center-pane { "true" }
+    bld.aui.anchor.attrib =
+        ##Specifies the direction the panel is anchored to. Cannot anchor to center.
+        attribute anchor {"right" | "left" | "top" | "bottom" }
 
     bld.aui.maximize-button.attrib =
         ##Should the panel have a maximize button.
@@ -139,6 +147,12 @@ div
         ##If true, then the panel or toolbar can be resized. If false, it cannot be resized.
         ##For panels, this is true by default. For toolbars, it is false by default.
         attribute resizeable { bld.boolean.data }
+
+    bld.aui.gripper.attrib =
+        ##If true, then the pane will have a region that the user can use to reposition it.
+        [ a:defaultValue = "true"]
+        attribute gripper { bld.boolean.data }
+    
 }
 
 ## Data types 
