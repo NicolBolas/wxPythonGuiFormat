@@ -14,17 +14,17 @@ def application(xml_path):
         `load.load_gui`.
     """
     
-    print("here")
+    #print("here")
     app = wx.App()
     gui = load_gui(xml_path, app)
-    print("gui loaded")
+    #print("gui loaded")
     frm = gui.get_frame_wnd("main")
-    print("main frame found")
-    print(frm)
+    #print("main frame found")
+    #print(frm)
     frm.Show()
-    print("window shown")
+    #print("window shown")
     gui.app().MainLoop()
-    print("post main loop")
+    #print("post main loop")
     return gui
 
 

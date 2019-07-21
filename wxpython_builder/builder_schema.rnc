@@ -42,7 +42,8 @@ div
         bld.height.attrib
 
     bld.frame.containers.model =
-        bld.panel.elem
+        bld.panel.elem |
+        bld.toolbar.elem
 }
 
 ##Frame containers
@@ -61,11 +62,34 @@ div
         bld.panel.aui.attlist
 
     bld.panel.aui.attlist =
-        bld.aui.panel.anchor.attrib,
-        bld.title.attrib?,
+        bld.panel.aui.dock.attrib,
+        bld.aui.caption.attrib?,
         bld.aui.common.attlist,
-        bld.aui.maximize-button.attrib?,
+        bld.aui.buttons.attrib?,
         bld.aui.floatable.attrib?
+
+    bld.aui.common.attlist =
+        bld.aui.name.attrib?,
+        bld.aui.row.attrib?,
+        bld.aui.layer.attrib?,
+        bld.aui.resizeable.attrib?,
+        bld.aui.gripper.attrib?
+
+    bld.toolbar.elem =
+        ##A toolbar in a frame window, storing arbitrary content.
+        element toolbar { bld.toolbar.contents }
+    
+    bld.toolbar.contents =
+        bld.toolbar.attlist
+
+    bld.toolbar.attlist =
+        bld.std.window.attlist,
+        bld.size.opt.attlist,
+        bld.toolbar.aui.attlist
+    
+    bld.toolbar.aui.attlist =
+        bld.aui.dock.attrib,
+        bld.aui.common.attlist
 
 }
 
@@ -80,12 +104,6 @@ div
         bld.width.attrib?,
         bld.height.attrib?
         
-    bld.aui.common.attlist =
-        bld.aui.aui-name.attrib?,
-        bld.aui.row.attrib?,
-        bld.aui.layer.attrib?,
-        bld.aui.resizeable.attrib?,
-        bld.aui.gripper.attrib?
 
 }
 
@@ -110,48 +128,51 @@ div
         ##Tooltip for this window.
         attribute tooltip { text }
 
-    bld.aui.aui-name.attrib =
+    bld.aui.name.attrib =
         ##Specifies the name of the toolbar/panel's aui pane.
         ##Having a fixed name is important for being able to save the configuration and reloading it.
         ##If this is not present, the pane uses the `id`, and if that's not present, it generates a
         ##name based on the number of unnamed panes before it in the frame.
-        attribute aui-name { text }
+        attribute aui.name { text }
         
-    bld.aui.panel.anchor.attrib =
-        ##Specifies the direction the panel is anchored to.
-        attribute anchor {"right" | "left" | "top" | "bottom" | "center" }
+    bld.aui.caption.attrib =
+        ##The visible caption for an AUI panel.
+        attribute aui.caption { text }
 
-    bld.aui.anchor.attrib =
-        ##Specifies the direction the panel is anchored to. Cannot anchor to center.
-        attribute anchor {"right" | "left" | "top" | "bottom" }
+    bld.panel.aui.dock.attrib =
+        ##Specifies the direction the panel is docked to.
+        attribute aui.dock {"right" | "left" | "top" | "bottom" | "center" }
 
-    bld.aui.maximize-button.attrib =
-        ##Should the panel have a maximize button.
-        [ a:defaultValue = "false" ]
-        attribute maximize-button { bld.boolean.data }
+    bld.aui.dock.attrib =
+        ##Specifies the direction the panel is docked to. Cannot dock to center.
+        attribute aui.dock {"right" | "left" | "top" | "bottom" }
+
+    bld.aui.buttons.attrib =
+        ##Specifies which buttons, if any, should be visible on the pane.
+        attribute aui.buttons { text }
 
     bld.aui.floatable.attrib =
         ##True if the panel/toolbar can be made floating.
         [ a:defaultValue = "true" ]
-        attribute floatable { bld.boolean.data }
+        attribute aui.floatable { bld.boolean.data }
 
     bld.aui.row.attrib =
         ## Specifies the order for panes attached to the same layer.
-        attribute row { xsd:nonNegativeInteger }
+        attribute aui.row { xsd:nonNegativeInteger }
 
     bld.aui.layer.attrib =
         ## Determines how close the attached pane is to the center.
-        attribute layer { xsd:nonNegativeInteger }
+        attribute aui.layer { xsd:nonNegativeInteger }
 
     bld.aui.resizeable.attrib =
         ##If true, then the panel or toolbar can be resized. If false, it cannot be resized.
         ##For panels, this is true by default. For toolbars, it is false by default.
-        attribute resizeable { bld.boolean.data }
+        attribute aui.resizeable { bld.boolean.data }
 
     bld.aui.gripper.attrib =
         ##If true, then the pane will have a region that the user can use to reposition it.
         [ a:defaultValue = "true"]
-        attribute gripper { bld.boolean.data }
+        attribute aui.gripper { bld.boolean.data }
     
 }
 

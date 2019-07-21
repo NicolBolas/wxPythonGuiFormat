@@ -32,17 +32,25 @@ def _calc_aui_default_name():
     return name
 
 
+_aui_dock_directions = {
+    "top" : wx.aui.AUI_DOCK_TOP,
+    "bottom" : wx.aui.AUI_DOCK_BOTTOM,
+    "left" : wx.aui.AUI_DOCK_LEFT,
+    "right" : wx.aui.AUI_DOCK_RIGHT,
+    "center" : wx.aui.AUI_DOCK_CENTER,
+}
+
 def _get_aui_pane_info(elem):
     """Parses the AUI info from the element's attributes."""
     pane_info = wx.aui.AuiPaneInfo()
     
     is_toolbar = False
     if elem.tag == "toolbar":
-        pane_info.Toolbar()
+        pane_info.ToolbarPane()
         is_toolbar = True
 
     #The pane name can be specified, or taken from the id, or generated.
-    aui_name = get_attrib(elem, "aui-name")
+    aui_name = get_attrib(elem, "aui.name")
     if not aui_name:
         aui_name = get_attrib(elem, "id")
         if not aui_name:
@@ -50,49 +58,51 @@ def _get_aui_pane_info(elem):
             
     pane_info.Name(aui_name)
     
-    title = get_attrib(elem, "title")
-    if title:
-        pane_info.Caption(title)
+    caption = get_attrib(elem, "aui.caption")
+    if caption:
+        pane_info.Caption(caption)
     
-    #Handling anchoring direction.
-    anchor = require_attrib(elem, "anchor")
-    if anchor == "top":
-        pane_info.Top()
-    elif anchor == "bottom":
-        pane_info.Bottom()
-    elif anchor == "left":
-        pane_info.Left()
-    elif anchor == "right":
-        pane_info.Right()
-    elif anchor == "center":
-        pane_info.Center()
-    else:
-        raise InvalidAttribValueError(elem, "anchor", anchor)
+    #Handling anchoring dock.
+    anchor = require_attrib(elem, "aui.dock")
+    try:
+        pane_info.Direction(_aui_dock_directions[anchor])
+    except:
+        raise InvalidAttribValueError(elem, "aui.dock", anchor)
 
-    row = get_attrib(elem, "row")
+    row = get_attrib(elem, "aui.row")
     if row:
         pane_info.Row(int(row))
 
-    layer = get_attrib(elem, "layer")
+    layer = get_attrib(elem, "aui.layer")
     if layer:
         pane_info.Layer(int(layer))
 
-    if get_attrib_bool(elem, "maximize-button", False):
-        pane_info.MaximizeButton()
-    
-    pane_info.BestSize(get_wnd_size_optional(elem))
     pane_info.CloseButton(False)
+    buttons = get_attrib(elem, "aui.buttons")
+    if buttons:
+        for button in buttons.split("|"):
+            if button == "maximize":
+                pane_info.MaximizeButton()
+            elif button == "minimize":
+                pane_info.MinimizeButton()
+            elif button == "close":
+                pane_info.CloseButton()
+            elif button == "pin":
+                pane_info.PinButton()
+            else:
+                raise InvalidAttribValueError(elem, "aui.buttons", buttons)
+        
+    pane_info.BestSize(get_wnd_size_optional(elem))
     
+    pane_info.Resizable(get_attrib_bool(elem, "aui.resizable", False if is_toolbar else True))
     
-    pane_info.Resizable(get_attrib_bool(elem, "resizable", False if is_toolbar else True))
-    
-    if not get_attrib_bool(elem, "gripper", True):
+    if not get_attrib_bool(elem, "aui.gripper", True):
         if is_toolbar:
             pane_info.Gripper(False)
         else:
             pane_info.CaptionVisible(False)
     
-    if not get_attrib_bool(elem, "floatable", True):
+    if not get_attrib_bool(elem, "aui.floatable", True):
         pane_info.Floatable(False)
     
     return pane_info
@@ -111,7 +121,7 @@ class _FrameElemProcs:
         
         self._frame = wx.Frame(None, title = title, size = frame_size)
 
-        self._aui = wx.aui.AuiManager(self._frame)
+        self._aui = wx.aui.AuiManager(self._frame, flags = wx.aui.AUI_MGR_DEFAULT + wx.aui.AUI_MGR_LIVE_RESIZE)
         
         self._frame.Bind(wx.EVT_CLOSE, _FrameCloser(self._frame, self._aui))
         
@@ -127,10 +137,7 @@ class _FrameElemProcs:
         panel_size = get_wnd_size_optional(elem)
         id = get_attrib(elem, "id")
         
-        #TODO: Compute an AUI-identifier if `id` is not found.
-        aui_id = id
-        
-        panel = wx.Panel(self._frame, size = panel_size)
+        panel = wx.Panel(self._frame)
         self._containers.append(panel)
         
         #TODO: Get and apply sizer information.
@@ -145,6 +152,12 @@ class _FrameElemProcs:
             self._id_wnd_map[id] = panel
         
         #TODO: Process children.
+    
+
+    def toolbar(self, elem):
+        """The difference between toolbars and panels is detected
+        through `elem.tag`, not which function was called."""
+        return self.panel(elem)
 
 
 class _RootElemProcs:
@@ -169,7 +182,6 @@ class _RootElemProcs:
         
         process_elements(frame_procs, elem, "as the child of a frame")
         
-        print(frame_procs._frame)
         frame_procs._frame.Hide()
         frame_procs._frame.Layout()
         frame_procs._aui.Update()
