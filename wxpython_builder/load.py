@@ -5,6 +5,7 @@ Provides the definitions for `build_gui` and `load_gui`, as well as the code for
 from .gui import Gui, GuiContainer
 from .exceptions import *
 from .load_common import *
+from .load_windows import *
 from lxml import etree
 import wx
 import wx.aui
@@ -131,28 +132,37 @@ class _FrameElemProcs:
         #Maps from ID to the actual window.
         self._id_wnd_map = {}
 
+
+    def _insert_window(id, wnd, wnd_element):
+        if id in self._id_wnd_map:
+            raise MultipleUseOfIdError(id, wnd_element, "window")
+        self._id_wnd_map[id] = wnd
+
         
     def panel(self, elem):
-
         panel_size = get_wnd_size_optional(elem)
-        id = get_attrib(elem, "id")
         
         panel = wx.Panel(self._frame)
         self._containers.append(panel)
         
-        #TODO: Get and apply sizer information.
+        sizer = create_sizer(elem)
+        panel.SetSizer(sizer)
+        panel.SetMinSize(panel_size)
         
         #Get and apply AUI information.
         pane_info = _get_aui_pane_info(elem)
         self._aui.AddPane(panel, pane_info)
 
+        id = get_attrib(elem, "id")
         if id:
             if id in self._id_wnd_map:
                 raise MultipleUseOfIdError(id, elem, "frame window")
             self._id_wnd_map[id] = panel
         
-        #TODO: Process children.
-    
+        #Process children.
+        panel_procs = WindowElementProcs(panel, sizer, self._insert_window)
+        process_elements(panel_procs, elem, "as the child of a pane")
+
 
     def toolbar(self, elem):
         """The difference between toolbars and panels is detected

@@ -54,12 +54,14 @@ div
         element panel { bld.panel.contents }
     
     bld.panel.contents =
-        bld.panel.attlist
+        bld.panel.attlist,
+        bld.windows.model*
 
     bld.panel.attlist =
         bld.std.window.attlist,
         bld.size.opt.attlist,
-        bld.panel.aui.attlist
+        bld.panel.aui.attlist,
+        bld.sizer.attlist
 
     bld.panel.aui.attlist =
         bld.panel.aui.dock.attrib,
@@ -80,17 +82,45 @@ div
         element toolbar { bld.toolbar.contents }
     
     bld.toolbar.contents =
-        bld.toolbar.attlist
+        bld.toolbar.attlist,
+        bld.windows.model*
 
     bld.toolbar.attlist =
         bld.std.window.attlist,
         bld.size.opt.attlist,
-        bld.toolbar.aui.attlist
+        bld.toolbar.aui.attlist,
+        bld.sizer.attlist
     
     bld.toolbar.aui.attlist =
         bld.aui.dock.attrib,
         bld.aui.common.attlist
+    
+    bld.windows.model =
+        bld.containers.model | bld.controls.model
+}
 
+##Container windows.
+div
+{
+    bld.containers.model = empty
+}
+
+##Control windows
+div
+{
+    bld.controls.model =
+        bld.ctrl.static-text.elem
+
+    bld.ctrl.static-text.elem =
+        element static-text { bld.ctrl.static-text.contents }
+
+    bld.ctrl.static-text.contents =
+        bld.ctrl.static-text.attlist
+
+    bld.ctrl.static-text.attlist =
+        bld.std.window.attlist,
+        bld.size.opt.attlist,
+        bld.static-text.label.attrib
 }
 
 ##Common attlists
@@ -104,7 +134,11 @@ div
         bld.width.attrib?,
         bld.height.attrib?
         
+    bld.sizer.attlist =
+        bld.box.sizer.attlist
 
+    bld.box.sizer.attlist =
+        bld.box.orient.attrib
 }
 
 ## All attributes.
@@ -128,52 +162,71 @@ div
         ##Tooltip for this window.
         attribute tooltip { text }
 
-    bld.aui.name.attrib =
-        ##Specifies the name of the toolbar/panel's aui pane.
-        ##Having a fixed name is important for being able to save the configuration and reloading it.
-        ##If this is not present, the pane uses the `id`, and if that's not present, it generates a
-        ##name based on the number of unnamed panes before it in the frame.
-        attribute aui.name { text }
-        
-    bld.aui.caption.attrib =
-        ##The visible caption for an AUI panel.
-        attribute aui.caption { text }
-
-    bld.panel.aui.dock.attrib =
-        ##Specifies the direction the panel is docked to.
-        attribute aui.dock {"right" | "left" | "top" | "bottom" | "center" }
-
-    bld.aui.dock.attrib =
-        ##Specifies the direction the panel is docked to. Cannot dock to center.
-        attribute aui.dock {"right" | "left" | "top" | "bottom" }
-
-    bld.aui.buttons.attrib =
-        ##Specifies which buttons, if any, should be visible on the pane.
-        attribute aui.buttons { text }
-
-    bld.aui.floatable.attrib =
-        ##True if the panel/toolbar can be made floating.
-        [ a:defaultValue = "true" ]
-        attribute aui.floatable { bld.boolean.data }
-
-    bld.aui.row.attrib =
-        ## Specifies the order for panes attached to the same layer.
-        attribute aui.row { xsd:nonNegativeInteger }
-
-    bld.aui.layer.attrib =
-        ## Determines how close the attached pane is to the center.
-        attribute aui.layer { xsd:nonNegativeInteger }
-
-    bld.aui.resizeable.attrib =
-        ##If true, then the panel or toolbar can be resized. If false, it cannot be resized.
-        ##For panels, this is true by default. For toolbars, it is false by default.
-        attribute aui.resizeable { bld.boolean.data }
-
-    bld.aui.gripper.attrib =
-        ##If true, then the pane will have a region that the user can use to reposition it.
-        [ a:defaultValue = "true"]
-        attribute aui.gripper { bld.boolean.data }
+    ##AUI attributes.
+    div 
+    {
+        bld.aui.name.attrib =
+            ##Specifies the name of the toolbar/panel's aui pane.
+            ##Having a fixed name is important for being able to save the configuration and reloading it.
+            ##If this is not present, the pane uses the `id`, and if that's not present, it generates a
+            ##name based on the number of unnamed panes before it in the frame.
+            attribute aui.name { text }
+            
+        bld.aui.caption.attrib =
+            ##The visible caption for an AUI panel.
+            attribute aui.caption { text }
     
+        bld.panel.aui.dock.attrib =
+            ##Specifies the direction the panel is docked to.
+            attribute aui.dock {"right" | "left" | "top" | "bottom" | "center" }
+    
+        bld.aui.dock.attrib =
+            ##Specifies the direction the panel is docked to. Cannot dock to center.
+            attribute aui.dock {"right" | "left" | "top" | "bottom" }
+    
+        bld.aui.buttons.attrib =
+            ##Specifies which buttons, if any, should be visible on the pane.
+            attribute aui.buttons { text }
+    
+        bld.aui.floatable.attrib =
+            ##True if the panel/toolbar can be made floating.
+            [ a:defaultValue = "true" ]
+            attribute aui.floatable { bld.boolean.data }
+    
+        bld.aui.row.attrib =
+            ## Specifies the order for panes attached to the same layer.
+            attribute aui.row { xsd:nonNegativeInteger }
+    
+        bld.aui.layer.attrib =
+            ## Determines how close the attached pane is to the center.
+            attribute aui.layer { xsd:nonNegativeInteger }
+    
+        bld.aui.resizeable.attrib =
+            ##If true, then the panel or toolbar can be resized. If false, it cannot be resized.
+            ##For panels, this is true by default. For toolbars, it is false by default.
+            attribute aui.resizeable { bld.boolean.data }
+    
+        bld.aui.gripper.attrib =
+            ##If true, then the pane will have a region that the user can use to reposition it.
+            [ a:defaultValue = "true"]
+            attribute aui.gripper { bld.boolean.data }
+    }
+    
+    ##Sizer attributes
+    div
+    {
+        bld.box.orient.attrib =
+            ##Stacking direction for the box.
+            attribute box.orient { "horizontal" | "vertical" }
+    }
+    
+    ##Control-specific attributes
+    div
+    {
+        bld.static-text.label.attrib =
+            ##Text to be displayed in the attribute.
+            attribute label { text }
+    }
 }
 
 ## Data types 

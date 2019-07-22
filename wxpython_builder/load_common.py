@@ -2,6 +2,7 @@
 
 
 import wx
+from .exceptions import *
 
 
 
@@ -14,8 +15,10 @@ def process_elements(procs, element, context):
     for elem in element:
         if elem.tag[0] == "_":
             raise InvalidElementNameError(elem.tag)
+            
+        search_name = elem.tag.replace("-", "_")
 
-        proc = getattr(procs, elem.tag, None)
+        proc = getattr(procs, search_name, None)
         if proc:
             proc(elem)
         else:
