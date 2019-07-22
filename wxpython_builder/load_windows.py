@@ -82,6 +82,12 @@ def add_tooltip(wnd, elem):
     
     
 
+_static_text_label_align = {
+    "left" : wx.ALIGN_LEFT,
+    "right" : wx.ALIGN_RIGHT,
+    "center" : wx.ALIGN_CENTRE_HORIZONTAL,
+}
+
 class WindowElementProcs:
     def __init__(self, parent_wnd, parent_sizer, insert_wnd_func):
         """
@@ -114,7 +120,13 @@ class WindowElementProcs:
         wnd_size = get_wnd_size_optional(elem)
         
         text = require_attrib(elem, "label")
-        text_wnd = wx.StaticText(self._wnd_stack[-1], label = text, size = wnd_size)
+        
+        style = 0
+        halign = get_attrib(elem, "label-align")
+        if halign:
+            style += _static_text_label_align[halign]
+        
+        text_wnd = wx.StaticText(self._wnd_stack[-1], label = text, size = wnd_size, style = style)
         self._sizer_stack[-1].Add(text_wnd, *get_sizer_flags(elem))
         
         self._finalize_control(text_wnd, elem)

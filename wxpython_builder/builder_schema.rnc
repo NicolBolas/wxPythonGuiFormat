@@ -121,7 +121,8 @@ div
         bld.std.window.attlist,
         bld.size.opt.attlist,
         bld.window.position.attlist,
-        bld.static-text.label.attrib
+        bld.static-text.label.attrib,
+        bld.static-text.label-align.attrib?
 }
 
 ##Common attlists
@@ -239,7 +240,7 @@ div
         bld.position.halign.attrib =
             ##Defines the horizontal alignment of the item in its sizer area.
             [a:defaultValue = "left"]
-            attribute halign { "left" | "right" | "center" }
+            attribute halign { bld.horiz.align.data }
             
         bld.position.expand.attrib =
             ##Specifies whether the size of the control expands to fill the give sizer area.
@@ -268,6 +269,10 @@ div
         bld.static-text.label.attrib =
             ##Text to be displayed in the attribute.
             attribute label { text }
+            
+        bld.static-text.label-align.attrib =
+            ##Alignment of the label within the static text.
+            attribute label-align { bld.horiz.align.data }
     }
 }
 
@@ -275,6 +280,8 @@ div
 div
 {
     bld.id.data = text
+    
+    bld.horiz.align.data = "left" | "right" | "center"
     
     ## XSD's boolean type includes things other than "true" and "false",
     ## so we do it manually.
