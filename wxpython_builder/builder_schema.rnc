@@ -120,6 +120,7 @@ div
     bld.ctrl.static-text.attlist =
         bld.std.window.attlist,
         bld.size.opt.attlist,
+        bld.window.position.attlist,
         bld.static-text.label.attrib
 }
 
@@ -139,6 +140,13 @@ div
 
     bld.box.sizer.attlist =
         bld.box.orient.attrib
+        
+    bld.window.position.attlist =
+        bld.position.valign.attrib?,
+        bld.position.halign.attrib?,
+        bld.position.expand.attrib?,
+        bld.position.proportion.attrib?,
+        (bld.position.border.size.attrib, bld.position.border.dir.attrib)?
 }
 
 ## All attributes.
@@ -218,6 +226,40 @@ div
         bld.box.orient.attrib =
             ##Stacking direction for the box.
             attribute box.orient { "horizontal" | "vertical" }
+    }
+    
+    ##Positioning attributes
+    div
+    {
+        bld.position.valign.attrib =
+            ##Defines the vertical alignment of the item in its sizer area.
+            [ a:defaultValue = "top"]
+            attribute valign { "top" | "bottom" | "center" }
+
+        bld.position.halign.attrib =
+            ##Defines the horizontal alignment of the item in its sizer area.
+            [a:defaultValue = "left"]
+            attribute halign { "left" | "right" | "center" }
+            
+        bld.position.expand.attrib =
+            ##Specifies whether the size of the control expands to fill the give sizer area.
+            [a:defaultValue = "false"]
+            attribute expand { bld.boolean.data }
+
+        bld.position.proportion.attrib =
+            ##Defines the proportion space ratio for the control.
+            [a:defaultValue = "0"]
+            attribute proportion { xsd:nonNegativeInteger }
+            
+        bld.position.border.size.attrib =
+            attribute border.size { xsd:nonNegativeInteger }
+        
+        bld.position.border.dir.attrib =
+            ##A `|` separated list of directions to which the border size will apply. May include:
+            ##"left", "right", "top", "bottom", or "all"
+            attribute border.dir { text }
+            
+            
     }
     
     ##Control-specific attributes

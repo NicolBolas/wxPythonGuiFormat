@@ -20,11 +20,58 @@ def create_sizer(elem):
     #TODO: Implement grid sizers.
 
 
+_horiz_alignment = {
+    "left" : wx.ALIGN_LEFT,
+    "right" : wx.ALIGN_RIGHT,
+    "center" : wx.ALIGN_CENTER_HORIZONTAL,
+}
+
+_vert_alignment = {
+    "top" : wx.ALIGN_TOP,
+    "bottom" : wx.ALIGN_BOTTOM,
+    "center" : wx.ALIGN_CENTER_VERTICAL,
+}
+
+_border_directions = {
+    "all" : wx.ALL,
+    "top" : wx.TOP,
+    "bottom" : wx.BOTTOM,
+    "left" : wx.LEFT,
+    "right" : wx.RIGHT,
+}
+
+
 def get_sizer_flags(elem):
     """Returns the 3 sizer flags as a tuple in the order appropriate to
     wx.Sizer::Add."""
     #TODO: Implement sizer flags.
-    return (0, 0, 0)
+    proportion = 0
+    flags = 0
+    border = 0
+    
+    halign = get_attrib(elem, "halign")
+    if halign:
+        flags += _horiz_alignment[halign]
+    
+    valign = get_attrib(elem, "valign")
+    if valign:
+        flags += _vert_alignment[valign]
+    
+    if get_attrib_bool(elem, "expand", False):
+        flags += wx.EXPAND
+    
+    proportion_value = get_attrib(elem, "proportion")
+    if proportion_value:
+        proportion = int(proportion_value)
+    
+    border_size = get_attrib(elem, "border.size")
+    if border_size:
+        border = int(border_size)
+        dirs = require_attrib(elem, "border.dir")
+        for dir in dirs.split("|"):
+            flags += _border_directions[dir]
+    
+    return (proportion, flags, border)
     
 
 def add_tooltip(wnd, elem):
