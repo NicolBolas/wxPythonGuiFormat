@@ -49,4 +49,23 @@ class InvalidAttribValueError(WxPythonBuilderError):
     
     def __init__(self, elem, attrib, value):
         self.message = f"The attribute {attrib} on element {elem.tag} has the value '{value}', which is invalid."
+
+
+class ConflictingImportNameError(WxPythonBuilderError):
+    """Raised when an import element imports a module with an
+    already used name."""
     
+    def __init__(self, import_name):
+        self.message = f"The module imported as {import_name} conflicts with a previously loaded module."
+
+
+class RootModuleNotLoadedError(WxPythonBuilderError):
+    """Raised if an import element without an `as` imports a
+    submodule whose root module has not been impoprted.
+    """
+    
+    def __init__(self, module_name, root_name):
+        self.message = f"The root {root_name} of {module_name} was not previously loaded, and no `as` attribute was used."
+
+
+

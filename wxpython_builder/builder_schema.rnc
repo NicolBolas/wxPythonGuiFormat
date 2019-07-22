@@ -15,9 +15,22 @@ div
 
     bld.app.contents =
         bld.app.attlist,
+        bld.module.elem*,
         bld.main-wnds.model+
 
     bld.app.attlist = empty
+    
+    bld.module.elem =
+        ##All children of the parent of this element will
+        ##have this module made available to any Python scripts.
+        element module { bld.module.contents }
+    
+    bld.module.contents =
+        bld.module.attlist
+    
+    bld.module.attlist =
+        bld.module.name.attrib,
+        bld.module.as.attrib?
     
     bld.main-wnds.model =
         bld.frame.elem
@@ -146,7 +159,8 @@ div
         bld.std.control.attlist,
         bld.size.opt.attlist,
         bld.window.position.attlist,
-        bld.button.label.model
+        bld.button.label.model,
+        bld.button.py.action.attrib?
 
     bld.button.label.model =
         ##Should also include a way to get a bitmap.
@@ -182,6 +196,16 @@ div
 ## All attributes.
 div
 {
+
+    bld.module.name.attrib =
+        ##Name of the module to import.
+        attribute name { text }
+        
+    bld.module.as.attrib =
+        ##The name to give the module. May not be dotted.
+        ##If not present, then the module will be imported as specified.
+        attribute as { text }
+
     bld.id.attrib =
         ## Identifier used to find specific windows within a context.
         attribute id { bld.id.data }
@@ -308,6 +332,10 @@ div
             ##Alignment of label in all four directions.
             [a:defaultValue = "center"]
             attribute label-align { bld.align.all.data }
+        
+        bld.button.py.action.attrib =
+            ##A Python expression to be invoked when this button is clicked.
+            attribute py.action { text }
     }
 }
 

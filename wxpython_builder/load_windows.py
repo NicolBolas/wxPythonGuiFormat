@@ -79,8 +79,28 @@ def add_tooltip(wnd, elem):
     tip = get_attrib(elem, "tooltip")
     if tip:
         wnd.SetToolTip(tip)
+
+
+def bind_window_events(wnd, modules, elem, event_map):
+    """Takes the events in the event_map and binds them to the
+    given window.
     
+    `elem` has some number of attributes which represent Python
+    code to execute when a particular event passes.
+    `event_map` maps from the attribute name to the wxPython
+    event type to register. This function iterates through
+    those events, and if the corresponding attribute exists,
+    will compile that expression as a lambda and register
+    it as the event handler.
+    """
     
+    #TODO: Deal with parameter differences for special event types.
+    for attrib, event in event_map.items():
+        action = get_attrib(elem, attrib)
+        if action:
+            func = eval("lambda event: " + action, modules)
+            wnd.Bind(event, func)
+
 
 _static_text_label_align = {
     "left" : wx.ALIGN_LEFT,
@@ -98,7 +118,7 @@ _button_label_align = {
 
 
 class WindowElementProcs:
-    def __init__(self, parent_wnd, parent_sizer, insert_wnd_func):
+    def __init__(self, parent_wnd, parent_sizer, modules, insert_wnd_func):
         """
         `insert_wnd_func` is a function that is given an ID, a window,
         and the XML element for that window.
@@ -106,6 +126,7 @@ class WindowElementProcs:
         frame container window. It will raise exceptions if the ID is
         already present.
         """
+        self._modules = modules
         self._wnd_stack = [parent_wnd]
         self._sizer_stack = [parent_sizer]
         
@@ -174,7 +195,13 @@ class WindowElementProcs:
             if halign:
                 style += _button_label_align[halign]
             
-            return wx.Button(par, label = text, size = wnd_size, style = style)
+            btn = wx.Button(par, label = text, size = wnd_size, style = style)
+            
+            bind_window_events(btn, self._modules, elem, {
+                "py.action" : wx.EVT_BUTTON
+            })
+            
+            return btn
         
         return self._common_control(elem, wnd)
 

@@ -9,6 +9,7 @@ from .load_windows import *
 from lxml import etree
 import wx
 import wx.aui
+import importlib
 
 
 class _FrameCloser:
@@ -114,7 +115,8 @@ class _FrameElemProcs:
     Class whose attributes are functions that process elements which are children of frames.
     """
     
-    def __init__(self, frame_elem):
+    def __init__(self, frame_elem, modules):
+        self._modules = modules
         self._id = require_attrib(frame_elem, "id")
         
         frame_size = get_wnd_size(frame_elem)
@@ -160,7 +162,7 @@ class _FrameElemProcs:
             self._id_wnd_map[id] = panel
         
         #Process children.
-        panel_procs = WindowElementProcs(panel, sizer, self._insert_window)
+        panel_procs = WindowElementProcs(panel, sizer, self._modules, self._insert_window)
         process_elements(panel_procs, elem, "as the child of a pane")
 
 
@@ -178,13 +180,39 @@ class _RootElemProcs:
 
     def __init__(self):
         self._frames = {}
+        #Always import `wx`.
+        self._imports = { "wx" : wx }
         pass
+    
+    
+    def module(self, elem):
+        module_name = require_attrib(elem, "name")
+        mod = importlib.import_module(module_name)
+        
+        as_name = get_attrib(elem, "as")
+        if as_name:
+            if as_name in self._imports:
+                raise ConflictingImportNameError(as_name)
+            self._imports[as_name] = mod
+        else:
+            root_mod = module_name.split(".", 1)
+            if len(root_mod) > 1:
+                #Root modules must have already been loaded.
+                if not root_mod[0] in self._imports:
+                    raise RootModuleNotLoadedError(module_name, root_mod[0])
+                #No need to store the module anywhere, since it's
+                #a submodule of a loaded module.
+            else:
+                #Not a submodule, so load it.
+                if module_name in self._imports:
+                    raise ConflictingImportNameError(module_name)
+                self._imports[module_name] = mod
     
     
     def frame(self, elem):
         _aui_default_name_ix = 0
         
-        frame_procs = _FrameElemProcs(elem)
+        frame_procs = _FrameElemProcs(elem, self._imports)
         if frame_procs._id in self._frames:
             raise MultipleUseOfIdError(frame_procs._id, elem, "main application")
 
