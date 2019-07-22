@@ -88,6 +88,15 @@ _static_text_label_align = {
     "center" : wx.ALIGN_CENTRE_HORIZONTAL,
 }
 
+_button_label_align = {
+    "top" : wx.BU_TOP,
+    "bottom" : wx.BU_BOTTOM,
+    "left" : wx.BU_LEFT,
+    "right" : wx.BU_RIGHT,
+    "center" : 0,
+}
+
+
 class WindowElementProcs:
     def __init__(self, parent_wnd, parent_sizer, insert_wnd_func):
         """
@@ -115,21 +124,58 @@ class WindowElementProcs:
         add_tooltip(wnd, elem)
         self._add_to_id_map(wnd, elem)
 
-    
-    def static_text(self, elem):
+
+    def _common_control(self, elem, func):
+        """Performs the common initialization and finalization tasks
+        for a control, with the creation of the window being
+        farmed out to the given function.
+        This function gets the window size, adds the window to the sizer,
+        adds it to the id map as appropriate, etc. All you need to do is
+        provide a function that returns a window.
+
+        The function must return a window.
+        
+        The given function takes, in order:
+            self
+            the element
+            the parent window
+            the window size
+        """
         wnd_size = get_wnd_size_optional(elem)
         
-        text = require_attrib(elem, "label")
-        
-        style = 0
-        halign = get_attrib(elem, "label-align")
-        if halign:
-            style += _static_text_label_align[halign]
-        
-        text_wnd = wx.StaticText(self._wnd_stack[-1], label = text, size = wnd_size, style = style)
-        self._sizer_stack[-1].Add(text_wnd, *get_sizer_flags(elem))
-        
-        self._finalize_control(text_wnd, elem)
+        wnd = func(self, elem, self._wnd_stack[-1], wnd_size)
 
+        self._sizer_stack[-1].Add(wnd, *get_sizer_flags(elem))
+        self._finalize_control(wnd, elem)
+        
+    
+    
+    
+    def static_text(self, elem):
+        def wnd(self, elem, par, wnd_size):
+            text = require_attrib(elem, "label")
+            
+            style = 0
+            halign = get_attrib(elem, "label-align")
+            if halign:
+                style += _static_text_label_align[halign]
+            
+            return wx.StaticText(par, label = text, size = wnd_size, style = style)
+        
+        return self._common_control(elem, wnd)
+
+
+    def button(self, elem):
+        def wnd(self, elem, par, wnd_size):
+            text = require_attrib(elem, "label")
+            
+            style = 0
+            halign = get_attrib(elem, "label-align")
+            if halign:
+                style += _button_label_align[halign]
+            
+            return wx.Button(par, label = text, size = wnd_size, style = style)
+        
+        return self._common_control(elem, wnd)
 
 

@@ -2,6 +2,7 @@
 
 
 import wx
+import lxml.etree as etree
 from .exceptions import *
 
 
@@ -13,6 +14,9 @@ def process_elements(procs, element, context):
     `context` is a text description of the kind of processing we're doing.
     """
     for elem in element:
+        if elem.tag is etree.PI or elem.tag is etree.Comment:
+            continue
+
         if elem.tag[0] == "_":
             raise InvalidElementNameError(elem.tag)
             

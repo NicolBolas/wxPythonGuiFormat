@@ -109,9 +109,11 @@ div
 div
 {
     bld.controls.model =
-        bld.ctrl.static-text.elem
+        bld.ctrl.static-text.elem |
+        bld.ctrl.button.elem
 
     bld.ctrl.static-text.elem =
+        ##A wxStaticText control
         element static-text { bld.ctrl.static-text.contents }
 
     bld.ctrl.static-text.contents =
@@ -119,10 +121,37 @@ div
 
     bld.ctrl.static-text.attlist =
         bld.std.window.attlist,
+        bld.std.control.attlist,
         bld.size.opt.attlist,
         bld.window.position.attlist,
-        bld.static-text.label.attrib,
-        bld.static-text.label-align.attrib?
+        bld.static-text.label.model
+    
+    bld.static-text.label.model =
+        bld.std.label.attrib,
+        bld.std.label-align.attrib?
+
+    ##May add default enable/disable attribute to controls or similar things.
+    bld.std.control.attlist =
+        empty
+
+    bld.ctrl.button.elem =
+        ##A wxButton or wxBitmapButton
+        element button { bld.ctrl.button.contents }
+        
+    bld.ctrl.button.contents =
+        bld.ctrl.button.attlist
+    
+    bld.ctrl.button.attlist =
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.size.opt.attlist,
+        bld.window.position.attlist,
+        bld.button.label.model
+
+    bld.button.label.model =
+        ##Should also include a way to get a bitmap.
+        bld.std.label.attrib,
+        bld.std.full.label-align.attrib?
 }
 
 ##Common attlists
@@ -266,13 +295,19 @@ div
     ##Control-specific attributes
     div
     {
-        bld.static-text.label.attrib =
+        bld.std.label.attrib =
             ##Text to be displayed in the attribute.
             attribute label { text }
             
-        bld.static-text.label-align.attrib =
-            ##Alignment of the label within the static text.
+        bld.std.label-align.attrib =
+            ##Alignment of the label within the control.
+            [a:defaultValue = "left"]
             attribute label-align { bld.horiz.align.data }
+            
+        bld.std.full.label-align.attrib =
+            ##Alignment of label in all four directions.
+            [a:defaultValue = "center"]
+            attribute label-align { bld.align.all.data }
     }
 }
 
@@ -282,6 +317,8 @@ div
     bld.id.data = text
     
     bld.horiz.align.data = "left" | "right" | "center"
+    
+    bld.align.all.data = "left" | "right" | "top" | "bottom" | "center"
     
     ## XSD's boolean type includes things other than "true" and "false",
     ## so we do it manually.
