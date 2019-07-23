@@ -146,6 +146,7 @@ class WindowElementProcs:
         self._add_to_id_map(wnd, elem)
 
 
+    #Controls
     def _common_control(self, elem, func):
         """Performs the common initialization and finalization tasks
         for a control, with the creation of the window being
@@ -168,10 +169,8 @@ class WindowElementProcs:
 
         self._sizer_stack[-1].Add(wnd, *get_sizer_flags(elem))
         self._finalize_control(wnd, elem)
-        
     
-    
-    
+
     def static_text(self, elem):
         def wnd(self, elem, par, wnd_size):
             text = require_attrib(elem, "label")
@@ -204,5 +203,40 @@ class WindowElementProcs:
             return btn
         
         return self._common_control(elem, wnd)
+
+
+    def spacer(self, elem):
+        size = int(get_attrib(elem, "size", "0"))
+        proportion = int(get_attrib(elem, "proportion", "0"))
+        
+        self._sizer_stack[-1].Add(size, size, proportion)
+
+
+    #Containers
+    def _process_children(self, elem, par_wnd = None, par_sizer = None):
+        """Does the necessary pushing and popping of the 
+        window/sizer"""
+        
+        self._wnd_stack.append(par_wnd if par_wnd else self._wnd_stack[-1])
+        self._sizer_stack.append(par_sizer if par_sizer else self._sizer_stack[-1])
+        
+        process_elements(self, elem, "as the child of a window")
+        
+        self._wnd_stack.pop()
+        self._sizer_stack.pop()
+
+
+    def sizer(self, elem):
+        wnd_size = get_wnd_size_optional(elem)
+        
+        sizer = create_sizer(elem)
+        sizer.SetMinSize(wnd_size)
+        
+        self._sizer_stack[-1].Add(sizer, *get_sizer_flags(elem))
+        
+        #Parse children.
+        self._process_children(elem, par_sizer = sizer)
+        
+        
 
 

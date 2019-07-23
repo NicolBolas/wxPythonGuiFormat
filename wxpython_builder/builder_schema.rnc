@@ -72,7 +72,6 @@ div
 
     bld.panel.attlist =
         bld.std.window.attlist,
-        bld.size.opt.attlist,
         bld.panel.aui.attlist,
         bld.sizer.attlist
 
@@ -100,7 +99,6 @@ div
 
     bld.toolbar.attlist =
         bld.std.window.attlist,
-        bld.size.opt.attlist,
         bld.toolbar.aui.attlist,
         bld.sizer.attlist
     
@@ -115,7 +113,21 @@ div
 ##Container windows.
 div
 {
-    bld.containers.model = empty
+    bld.containers.model =
+        bld.cont.sizer.elem
+    
+    bld.cont.sizer.elem =
+        ##A non-window sizer, which can contain other windows.
+        element sizer { bld.cont.sizer.contents }
+    
+    bld.cont.sizer.contents =
+        bld.cont.sizer.attlist,
+        bld.windows.model*
+    
+    bld.cont.sizer.attlist =
+        bld.size.opt.attlist,
+        bld.window.position.attlist,
+        bld.sizer.attlist
 }
 
 ##Control windows
@@ -123,7 +135,8 @@ div
 {
     bld.controls.model =
         bld.ctrl.static-text.elem |
-        bld.ctrl.button.elem
+        bld.ctrl.button.elem |
+        bld.ctrl.spacer.elem
 
     bld.ctrl.static-text.elem =
         ##A wxStaticText control
@@ -135,7 +148,6 @@ div
     bld.ctrl.static-text.attlist =
         bld.std.window.attlist,
         bld.std.control.attlist,
-        bld.size.opt.attlist,
         bld.window.position.attlist,
         bld.static-text.label.model
     
@@ -157,7 +169,6 @@ div
     bld.ctrl.button.attlist =
         bld.std.window.attlist,
         bld.std.control.attlist,
-        bld.size.opt.attlist,
         bld.window.position.attlist,
         bld.button.label.model,
         bld.button.py.action.attrib?
@@ -166,6 +177,17 @@ div
         ##Should also include a way to get a bitmap.
         bld.std.label.attrib,
         bld.std.full.label-align.attrib?
+    
+    bld.ctrl.spacer.elem =
+        ##Inserts space into the parent sizer.
+        element spacer { bld.ctrl.spacer.contents }
+
+    bld.ctrl.spacer.contents =
+        bld.ctrl.spacer.attlist
+
+    bld.ctrl.spacer.attlist =
+        bld.spacer.size.attrib?,
+        bld.position.proportion.attrib?
 }
 
 ##Common attlists
@@ -173,7 +195,8 @@ div
 {
     bld.std.window.attlist =
         bld.tooltip.attrib?,
-        bld.id.attrib?
+        bld.id.attrib?,
+        bld.size.opt.attlist
 
     bld.size.opt.attlist =
         bld.width.attrib?,
@@ -196,7 +219,6 @@ div
 ## All attributes.
 div
 {
-
     bld.module.name.attrib =
         ##Name of the module to import.
         attribute name { text }
@@ -247,7 +269,8 @@ div
             attribute aui.dock {"right" | "left" | "top" | "bottom" }
     
         bld.aui.buttons.attrib =
-            ##Specifies which buttons, if any, should be visible on the pane.
+            ##A `|` separated list of buttons that should be visible on the pane.
+            ##Valid button names are "close", "pin", "minimize", and "maximize"
             attribute aui.buttons { text }
     
         bld.aui.floatable.attrib =
@@ -336,6 +359,10 @@ div
         bld.button.py.action.attrib =
             ##A Python expression to be invoked when this button is clicked.
             attribute py.action { text }
+        
+        bld.spacer.size.attrib =
+            ##The size for the spacer.
+            attribute size { xsd:nonNegativeInteger }
     }
 }
 
