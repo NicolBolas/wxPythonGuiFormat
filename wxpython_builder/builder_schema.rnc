@@ -203,11 +203,23 @@ div
         bld.height.attrib?
         
     bld.sizer.attlist =
-        bld.box.sizer.attlist
+        bld.box.sizer.attlist |
+        bld.gridsizer.sizer.attlist
 
     bld.box.sizer.attlist =
         bld.box.orient.attrib
-        
+
+    bld.gridsizer.sizer.attlist =
+        bld.gridsizer.sizer.starter.model,
+        bld.gridsizer.hgap.attrib?,
+        bld.gridsizer.vgap.attrib?,
+        bld.gridsizer.fixed.attrib?
+    
+    bld.gridsizer.sizer.starter.model =
+        bld.gridsider.columns.attrib |
+        bld.gridsider.rows.attrib |
+        (bld.gridsider.rows.attrib, bld.gridsider.columns.attrib)
+
     bld.window.position.attlist =
         bld.position.valign.attrib?,
         bld.position.halign.attrib?,
@@ -303,6 +315,31 @@ div
         bld.box.orient.attrib =
             ##Stacking direction for the box.
             attribute box.orient { "horizontal" | "vertical" }
+        
+        bld.gridsider.columns.attrib =
+            ##Number of columns for a grid sizer.
+            [ a:defaultValue = "0" ]
+            attribute grid.columns { xsd:nonNegativeInteger }
+            
+        bld.gridsider.rows.attrib =
+            ##Number of columns for a grid sizer.
+            [ a:defaultValue = "0" ]
+            attribute grid.rows { xsd:nonNegativeInteger }
+        
+        bld.gridsizer.hgap.attrib =
+            ##The gap in pixels between rows
+            [ a:defaultValue = "0" ]
+            attribute grid.hgap { xsd:nonNegativeInteger }
+
+        bld.gridsizer.vgap.attrib =
+            ##The gap in pixels between columns
+            [ a:defaultValue = "0" ]
+            attribute grid.vgap { xsd:nonNegativeInteger }
+            
+        bld.gridsizer.fixed.attrib =
+            ##If true, then it uses a regular GridSizer; otherwise a FlexGridSizer
+            [ a:defaultValue = "false" ]
+            attribute grid.fixed { bld.boolean.data }
     }
     
     ##Positioning attributes

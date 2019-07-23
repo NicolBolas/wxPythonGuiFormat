@@ -12,12 +12,25 @@ def create_sizer(elem):
     """Builds a WX sizer for the given window element, based on its
     attributes."""
     
-    orient = get_attrib(elem, "box.orient")
-    if orient:
+    attrib = elem.attrib
+    
+    if "box.orient" in attrib:
         #TODO: Implement wrap-box sizer.
-        sizer = wx.BoxSizer(_box_sizer_orient[orient])
+        sizer = wx.BoxSizer(_box_sizer_orient[attrib["box.orient"]])
         return sizer
-    #TODO: Implement grid sizers.
+    if "grid.columns" in attrib or "grid.rows" in attrib:
+        num_columns = int(attrib.get("grid.columns", "0"))
+        num_rows = int(attrib.get("grid.rows", "0"))
+        
+        hgap = int(attrib.get("grid.hgap", "0"))
+        vgap = int(attrib.get("grid.vgap", "0"))
+        
+        if get_attrib_bool(elem, "grid.fixed", False):
+            return wx.GridSizer(num_rows, num_columns, hgap, vgap)
+        
+        return wx.FlexGridSizer(num_rows, num_columns, hgap, vgap)
+    else:
+        raise MissingSizerAttributesError(elem)
 
 
 _horiz_alignment = {

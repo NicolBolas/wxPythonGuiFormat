@@ -68,4 +68,11 @@ class RootModuleNotLoadedError(WxPythonBuilderError):
         self.message = f"The root {root_name} of {module_name} was not previously loaded, and no `as` attribute was used."
 
 
+class MissingSizerAttributesError(WxPythonBuilderError):
+    """Raised if a container lacks sizer attributes."""
+    
+    def __init__(self, elem):
+        self.message = f"The element {elem.tag} is missing sizer attributes."
+
+
 
