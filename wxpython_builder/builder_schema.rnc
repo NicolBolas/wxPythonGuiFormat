@@ -114,7 +114,9 @@ div
 div
 {
     bld.containers.model =
-        bld.cont.sizer.elem
+        ##A choice between the various container elements
+        bld.cont.sizer.elem |
+        bld.cont.pane.elem
     
     bld.cont.sizer.elem =
         ##A non-window sizer, which can contain other windows.
@@ -126,6 +128,19 @@ div
     
     bld.cont.sizer.attlist =
         bld.size.opt.attlist,
+        bld.window.position.attlist,
+        bld.sizer.attlist
+
+    bld.cont.pane.elem =
+        ##A window that contains other windows.
+        element pane { bld.cont.pane.contents }
+
+    bld.cont.pane.contents =
+        bld.cont.pane.attlist,
+        bld.windows.model*
+
+    bld.cont.pane.attlist =
+        bld.std.window.attlist,
         bld.window.position.attlist,
         bld.sizer.attlist
 }

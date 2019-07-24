@@ -239,6 +239,36 @@ class WindowElementProcs:
         self._sizer_stack.pop()
 
 
+    def _common_container(self, elem, func):
+        """Performs the common initialization and finalization tasks
+        for a container, including processing the child elements.
+        The creation of the window is farmed out to the given function.
+        
+        This function gets the window size, adds the window to
+        the sizer, adds it to the id map as appropriate, etc.
+        All you need to do is provide a function that returns a window.
+
+        The function must return a window.
+        
+        The given function takes, in order:
+            self
+            the element
+            the parent window
+            the window size
+        """
+        wnd_size = get_wnd_size_optional(elem)
+        
+        wnd = func(self, elem, self._wnd_stack[-1], wnd_size)
+
+        self._sizer_stack[-1].Add(wnd, *get_sizer_flags(elem))
+        sizer = create_sizer(elem)
+        wnd.SetSizer(sizer)
+        wnd.SetMinSize(wnd_size)
+        
+        self._process_children(elem, par_wnd = wnd, par_sizer = sizer)
+        self._finalize_control(wnd, elem)
+
+
     def sizer(self, elem):
         wnd_size = get_wnd_size_optional(elem)
         
@@ -250,6 +280,11 @@ class WindowElementProcs:
         #Parse children.
         self._process_children(elem, par_sizer = sizer)
         
+
+    def pane(self, elem):
+        def _wnd(self, elem, par, wnd_size):
+            return wx.Panel(par, size = wnd_size, style = wx.TAB_TRAVERSAL + wx.NO_BORDER);
         
+        return self._common_container(elem, _wnd)
 
 
