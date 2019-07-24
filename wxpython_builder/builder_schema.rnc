@@ -116,7 +116,9 @@ div
     bld.containers.model =
         ##A choice between the various container elements
         bld.cont.sizer.elem |
-        bld.cont.pane.elem
+        bld.cont.pane.elem |
+        bld.cont.scroll-window.elem |
+        bld.cont.box.elem
     
     bld.cont.sizer.elem =
         ##A non-window sizer, which can contain other windows.
@@ -143,6 +145,36 @@ div
         bld.std.window.attlist,
         bld.window.position.attlist,
         bld.sizer.attlist
+
+    bld.cont.scroll-window.elem =
+        ##A scrollable container.
+        element scroll-window { bld.cont.scroll-window.contents }
+    
+    bld.cont.scroll-window.contents =
+        bld.cont.scroll-window.attlist,
+        bld.windows.model*
+
+    bld.cont.scroll-window.attlist =
+        bld.std.window.attlist,
+        bld.window.position.attlist,
+        bld.sizer.attlist,
+        bld.scroll-window.hscroll.attrib?,
+        bld.scroll-window.vscroll.attrib?
+        
+    bld.cont.box.elem =
+        ##A box with a line around it and a text heading.
+        element box { bld.cont.box.contents }
+        
+    bld.cont.box.contents =
+        bld.cont.box.attlist,
+        bld.windows.model*
+    
+    bld.cont.box.attlist =
+        bld.std.window.attlist,
+        bld.window.position.attlist,
+        bld.sizer.attlist,
+        bld.box.label.attrib
+        
 }
 
 ##Control windows
@@ -391,7 +423,7 @@ div
             
     }
     
-    ##Control-specific attributes
+    ##Window-specific attributes
     div
     {
         bld.std.label.attrib =
@@ -415,6 +447,20 @@ div
         bld.spacer.size.attrib =
             ##The size for the spacer.
             attribute size { xsd:nonNegativeInteger }
+
+        bld.scroll-window.hscroll.attrib =
+            ##Horizontal scrolling rate when using arrows
+            [ a:defaultValue = "0" ]
+            attribute hscroll { xsd:nonNegativeInteger }
+            
+        bld.scroll-window.vscroll.attrib =
+            ##Vertical scrolling rate when using arrows
+            [ a:defaultValue = "0" ]
+            attribute vscroll { xsd:nonNegativeInteger }
+            
+        bld.box.label.attrib =
+            ##The text name to display for the box.
+            attribute label { text }
     }
 }
 

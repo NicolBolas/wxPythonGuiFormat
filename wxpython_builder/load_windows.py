@@ -288,3 +288,45 @@ class WindowElementProcs:
         return self._common_container(elem, _wnd)
 
 
+    def scroll_window(self, elem):
+        def _wnd(self, elem, par, wnd_size):
+            wnd = wx.ScrolledWindow(par, size = wnd_size)
+            
+            hscroll = int(get_attrib(elem, "hscroll", "0"))
+            vscroll = int(get_attrib(elem, "vscroll", "0"))
+            wnd.SetScrollRate(hscroll, vscroll)
+            
+            return wnd
+    
+        return self._common_container(elem, _wnd)
+
+
+    def box(self, elem):
+        wnd_size = get_wnd_size_optional(elem)
+        
+        wnd = wx.StaticBox(self._wnd_stack[-1],
+            label = require_attrib(elem, "label"),
+            size = wnd_size)
+        
+        #We have to create this box sizer for our static box
+        #But the actual sizer may be something else, so we don't
+        #really want to use the box sizer. So we add a new
+        #sizer to it.
+        static_sizer = wx.StaticBoxSizer(wnd, wx.VERTICAL)
+        static_sizer.SetMinSize(wnd_size)
+
+        sizer = create_sizer(elem)
+        static_sizer.Add(sizer, 1, wx.EXPAND, 0)
+        wnd.SetSizer(sizer)
+        wnd.SetMinSize(wnd_size)
+        
+        #Note that we add the box's sizer rather than the box itself.
+        #... I have no idea why, but the world breaks if we
+        #add the window instead of the sizer.
+        self._sizer_stack[-1].Add(static_sizer, *get_sizer_flags(elem))
+
+        self._process_children(elem, par_wnd = wnd, par_sizer = sizer)
+        self._finalize_control(wnd, elem)
+        
+
+
