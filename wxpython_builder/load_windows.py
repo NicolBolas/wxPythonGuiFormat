@@ -329,4 +329,31 @@ class WindowElementProcs:
         self._finalize_control(wnd, elem)
         
 
+    def coll_pane(self, elem):
+        wnd_size = get_wnd_size_optional(elem)
+        
+        wnd = wx.CollapsiblePane(self._wnd_stack[-1],
+            label = get_attrib(elem, "label", ""),
+            size = wnd_size,
+            style = wx.CP_DEFAULT_STYLE + wx.CP_NO_TLW_RESIZE)
+
+        self._sizer_stack[-1].Add(wnd, *get_sizer_flags(elem))
+        sizer = create_sizer(elem)
+        wnd.GetPane().SetSizer(sizer)
+        wnd.SetMinSize(wnd_size)
+        
+        self._process_children(elem,
+            par_wnd = wnd.GetPane(),
+            par_sizer = sizer)
+        self._finalize_control(wnd, elem)
+        
+        wnd.Collapse(get_attrib_bool(elem, "collapsed", False))
+        
+        def evt(event):
+            parent = event.GetEventObject().GetParent()
+            while parent:
+                parent.Layout()
+                parent = parent.GetParent()
+        
+        wnd.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, evt)
 

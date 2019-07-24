@@ -118,7 +118,8 @@ div
         bld.cont.sizer.elem |
         bld.cont.pane.elem |
         bld.cont.scroll-window.elem |
-        bld.cont.box.elem
+        bld.cont.box.elem |
+        bld.cont.coll-pane.elem
     
     bld.cont.sizer.elem =
         ##A non-window sizer, which can contain other windows.
@@ -175,6 +176,20 @@ div
         bld.sizer.attlist,
         bld.box.label.attrib
         
+    bld.cont.coll-pane.elem =
+        ##A pane which can be collapsed and opened via a button click.
+        element coll-pane { bld.cont.coll-pane.contents }
+    
+    bld.cont.coll-pane.contents =
+        bld.cont.coll-pane.attlist,
+        bld.windows.model*
+    
+    bld.cont.coll-pane.attlist =
+        bld.std.window.attlist,
+        bld.window.position.attlist,
+        bld.sizer.attlist,
+        bld.coll-pane.label.attrib,
+        bld.coll-pane.collapsed.attrib?        
 }
 
 ##Control windows
@@ -461,6 +476,15 @@ div
         bld.box.label.attrib =
             ##The text name to display for the box.
             attribute label { text }
+
+        bld.coll-pane.label.attrib =
+            ##The text to display for the collapsible pane.
+            attribute label { text }
+
+        bld.coll-pane.collapsed.attrib =
+            ##Whether the pane starts collapsed or not.
+            [ a:defaultValue = "false" ]
+            attribute collapsed { bld.boolean.data }
     }
 }
 
