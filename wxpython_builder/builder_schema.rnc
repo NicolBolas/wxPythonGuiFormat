@@ -287,7 +287,7 @@ div
         bld.layout.halign.attrib?,
         bld.layout.expand.attrib?,
         bld.layout.proportion.attrib?,
-        (bld.layout.border.size.attrib, bld.layout.border.dir.attrib)?
+        (bld.layout.border-size.attrib, bld.layout.border-dir.attrib)?
 }
 
 ## All attributes.
@@ -427,13 +427,13 @@ div
             [a:defaultValue = "0"]
             attribute layout.proportion { xsd:nonNegativeInteger }
             
-        bld.layout.border.size.attrib =
-            attribute layout.border.size { xsd:nonNegativeInteger }
+        bld.layout.border-size.attrib =
+            attribute layout.border-size { xsd:nonNegativeInteger }
         
-        bld.layout.border.dir.attrib =
+        bld.layout.border-dir.attrib =
             ##A `|` separated list of directions to which the border size will apply. May include:
             ##"left", "right", "top", "bottom", or "all"
-            attribute layout.border.dir { text }
+            attribute layout.border-dir { text }
             
           
     }

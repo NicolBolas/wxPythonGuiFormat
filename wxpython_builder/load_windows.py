@@ -77,10 +77,10 @@ def get_sizer_flags(elem):
     if proportion_value:
         proportion = int(proportion_value)
     
-    border_size = get_attrib(elem, "layout.border.size")
+    border_size = get_attrib(elem, "layout.border-size")
     if border_size:
         border = int(border_size)
-        dirs = require_attrib(elem, "layout.border.dir")
+        dirs = require_attrib(elem, "layout.border-dir")
         for dir in dirs.split("|"):
             flags += _border_directions[dir]
     
