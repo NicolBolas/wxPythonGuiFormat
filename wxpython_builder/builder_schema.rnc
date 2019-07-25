@@ -249,7 +249,7 @@ div
 
     bld.ctrl.spacer.attlist =
         bld.spacer.size.attrib?,
-        bld.layout.proportion.attrib?
+        bld.window.layout.attlist?
 }
 
 ##Common attlists

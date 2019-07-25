@@ -220,9 +220,8 @@ class WindowElementProcs:
 
     def spacer(self, elem):
         size = int(get_attrib(elem, "size", "0"))
-        proportion = int(get_attrib(elem, "proportion", "0"))
         
-        self._sizer_stack[-1].Add(size, size, proportion)
+        self._sizer_stack[-1].Add(size, size, *get_sizer_flags(elem))
 
 
     #Containers
