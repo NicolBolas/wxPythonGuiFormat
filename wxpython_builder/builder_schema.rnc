@@ -131,7 +131,7 @@ div
     
     bld.cont.sizer.attlist =
         bld.size.opt.attlist,
-        bld.window.position.attlist,
+        bld.window.layout.attlist,
         bld.sizer.attlist
 
     bld.cont.pane.elem =
@@ -144,7 +144,7 @@ div
 
     bld.cont.pane.attlist =
         bld.std.window.attlist,
-        bld.window.position.attlist,
+        bld.window.layout.attlist,
         bld.sizer.attlist
 
     bld.cont.scroll-window.elem =
@@ -157,7 +157,7 @@ div
 
     bld.cont.scroll-window.attlist =
         bld.std.window.attlist,
-        bld.window.position.attlist,
+        bld.window.layout.attlist,
         bld.sizer.attlist,
         bld.scroll-window.hscroll.attrib?,
         bld.scroll-window.vscroll.attrib?
@@ -172,7 +172,7 @@ div
     
     bld.cont.box.attlist =
         bld.std.window.attlist,
-        bld.window.position.attlist,
+        bld.window.layout.attlist,
         bld.sizer.attlist,
         bld.box.label.attrib
         
@@ -186,7 +186,7 @@ div
     
     bld.cont.coll-pane.attlist =
         bld.std.window.attlist,
-        bld.window.position.attlist,
+        bld.window.layout.attlist,
         bld.sizer.attlist,
         bld.coll-pane.label.attrib,
         bld.coll-pane.collapsed.attrib?        
@@ -210,7 +210,7 @@ div
     bld.ctrl.static-text.attlist =
         bld.std.window.attlist,
         bld.std.control.attlist,
-        bld.window.position.attlist,
+        bld.window.layout.attlist,
         bld.static-text.label.model
     
     bld.static-text.label.model =
@@ -231,7 +231,7 @@ div
     bld.ctrl.button.attlist =
         bld.std.window.attlist,
         bld.std.control.attlist,
-        bld.window.position.attlist,
+        bld.window.layout.attlist,
         bld.button.label.model,
         bld.button.py.action.attrib?
 
@@ -249,7 +249,7 @@ div
 
     bld.ctrl.spacer.attlist =
         bld.spacer.size.attrib?,
-        bld.position.proportion.attrib?
+        bld.layout.proportion.attrib?
 }
 
 ##Common attlists
@@ -282,12 +282,12 @@ div
         bld.gridsider.rows.attrib |
         (bld.gridsider.rows.attrib, bld.gridsider.columns.attrib)
 
-    bld.window.position.attlist =
-        bld.position.valign.attrib?,
-        bld.position.halign.attrib?,
-        bld.position.expand.attrib?,
-        bld.position.proportion.attrib?,
-        (bld.position.border.size.attrib, bld.position.border.dir.attrib)?
+    bld.window.layout.attlist =
+        bld.layout.valign.attrib?,
+        bld.layout.halign.attrib?,
+        bld.layout.expand.attrib?,
+        bld.layout.proportion.attrib?,
+        (bld.layout.border.size.attrib, bld.layout.border.dir.attrib)?
 }
 
 ## All attributes.
@@ -407,35 +407,35 @@ div
     ##Positioning attributes
     div
     {
-        bld.position.valign.attrib =
+        bld.layout.valign.attrib =
             ##Defines the vertical alignment of the item in its sizer area.
             [ a:defaultValue = "top"]
-            attribute valign { "top" | "bottom" | "center" }
+            attribute layout.valign { "top" | "bottom" | "center" }
 
-        bld.position.halign.attrib =
+        bld.layout.halign.attrib =
             ##Defines the horizontal alignment of the item in its sizer area.
             [a:defaultValue = "left"]
-            attribute halign { bld.horiz.align.data }
+            attribute layout.halign { bld.horiz.align.data }
             
-        bld.position.expand.attrib =
+        bld.layout.expand.attrib =
             ##Specifies whether the size of the control expands to fill the give sizer area.
             [a:defaultValue = "false"]
-            attribute expand { bld.boolean.data }
+            attribute layout.expand { bld.boolean.data }
 
-        bld.position.proportion.attrib =
+        bld.layout.proportion.attrib =
             ##Defines the proportion space ratio for the control.
             [a:defaultValue = "0"]
-            attribute proportion { xsd:nonNegativeInteger }
+            attribute layout.proportion { xsd:nonNegativeInteger }
             
-        bld.position.border.size.attrib =
-            attribute border.size { xsd:nonNegativeInteger }
+        bld.layout.border.size.attrib =
+            attribute layout.border.size { xsd:nonNegativeInteger }
         
-        bld.position.border.dir.attrib =
+        bld.layout.border.dir.attrib =
             ##A `|` separated list of directions to which the border size will apply. May include:
             ##"left", "right", "top", "bottom", or "all"
-            attribute border.dir { text }
+            attribute layout.border.dir { text }
             
-            
+          
     }
     
     ##Window-specific attributes

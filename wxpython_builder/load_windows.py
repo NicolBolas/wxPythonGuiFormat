@@ -62,25 +62,25 @@ def get_sizer_flags(elem):
     flags = 0
     border = 0
     
-    halign = get_attrib(elem, "halign")
+    halign = get_attrib(elem, "layout.halign")
     if halign:
         flags += _horiz_alignment[halign]
     
-    valign = get_attrib(elem, "valign")
+    valign = get_attrib(elem, "layout.valign")
     if valign:
         flags += _vert_alignment[valign]
     
-    if get_attrib_bool(elem, "expand", False):
+    if get_attrib_bool(elem, "layout.expand", False):
         flags += wx.EXPAND
     
-    proportion_value = get_attrib(elem, "proportion")
+    proportion_value = get_attrib(elem, "layout.proportion")
     if proportion_value:
         proportion = int(proportion_value)
     
-    border_size = get_attrib(elem, "border.size")
+    border_size = get_attrib(elem, "layout.border.size")
     if border_size:
         border = int(border_size)
-        dirs = require_attrib(elem, "border.dir")
+        dirs = require_attrib(elem, "layout.border.dir")
         for dir in dirs.split("|"):
             flags += _border_directions[dir]
     
