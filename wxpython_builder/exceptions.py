@@ -74,5 +74,9 @@ class MissingSizerAttributesError(WxPythonBuilderError):
     def __init__(self, elem):
         self.message = f"The element {elem.tag} is missing sizer attributes."
 
-
+class CannotDefaultTwoStateCheckBoxUndefError(WxPythonBuilderError):
+    """Raised if the user tries to make a 2-state checkbox undefined."""
+    
+    def __init__(self):
+        self.message = f"A two-state checkbox element cannot have a default value of 'undef'."
 

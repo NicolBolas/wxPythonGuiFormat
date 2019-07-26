@@ -27,6 +27,8 @@ def create_sizer(elem):
         
         if get_attrib_bool(elem, "grid.fixed", False):
             return wx.GridSizer(num_rows, num_columns, hgap, vgap)
+            
+        #TODO: Implement proportional spacing for flex grid sizer.
         
         return wx.FlexGridSizer(num_rows, num_columns, hgap, vgap)
     else:
@@ -57,7 +59,6 @@ _border_directions = {
 def get_sizer_flags(elem):
     """Returns the 3 sizer flags as a tuple in the order appropriate to
     wx.Sizer::Add."""
-    #TODO: Implement sizer flags.
     proportion = 0
     flags = 0
     border = 0
@@ -222,6 +223,40 @@ class WindowElementProcs:
         size = int(get_attrib(elem, "size", "0"))
         
         self._sizer_stack[-1].Add(size, size, *get_sizer_flags(elem))
+
+    
+    def checkbox(self, elem):
+        def wnd(self, elem, par, wnd_size):
+            text = require_attrib(elem, "label")
+            
+            style = 0
+            
+            states = get_attrib(elem, "states", "two")
+            if states == "three":
+                style += wx.CHK_3STATE
+            elif states == "three-user":
+                style += wx.CHK_3STATE + wx.CHK_ALLOW_3RD_STATE_FOR_USER
+            
+            
+            box = wx.CheckBox(par, label = text, size = wnd_size, style = style)
+            
+            default = get_attrib(elem, "default", "false")
+            if default == "undef":
+                if states == "two":
+                    raise CannotDefaultTwoStateCheckBoxUndefError()
+                box.Set3StateValue(wx.CHK_UNDETERMINED)
+            elif default == "true":
+                box.SetValue(True)
+            else:
+                box.SetValue(False)
+            
+            bind_window_events(box, self._modules, elem, {
+                "py.action" : wx.EVT_CHECKBOX
+            })
+            
+            return box
+        
+        return self._common_control(elem, wnd)
 
 
     #Containers

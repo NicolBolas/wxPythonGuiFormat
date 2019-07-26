@@ -174,7 +174,7 @@ div
         bld.std.window.attlist,
         bld.window.layout.attlist,
         bld.sizer.attlist,
-        bld.box.label.attrib
+        bld.std.label.attrib
         
     bld.cont.coll-pane.elem =
         ##A pane which can be collapsed and opened via a button click.
@@ -198,7 +198,8 @@ div
     bld.controls.model =
         bld.ctrl.static-text.elem |
         bld.ctrl.button.elem |
-        bld.ctrl.spacer.elem
+        bld.ctrl.spacer.elem |
+        bld.ctrl.checkbox.elem
 
     bld.ctrl.static-text.elem =
         ##A wxStaticText control
@@ -232,7 +233,7 @@ div
         bld.std.window.attlist,
         bld.std.control.attlist,
         bld.window.layout.attlist,
-        bld.button.label.model,
+        bld.std.label.attrib,
         bld.button.py.action.attrib?
 
     bld.button.label.model =
@@ -250,6 +251,22 @@ div
     bld.ctrl.spacer.attlist =
         bld.spacer.size.attrib?,
         bld.window.layout.attlist?
+
+    bld.ctrl.checkbox.elem =
+        element checkbox { bld.ctrl.checkbox.contents }
+    
+    bld.ctrl.checkbox.contents =
+        bld.ctrl.checkbox.attlist
+    
+    bld.ctrl.checkbox.attlist =
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.window.layout.attlist,
+        bld.std.label.attrib,
+        bld.checkbox.states.attrib?,
+        bld.checkbox.default.attrib?,
+        bld.button.py.action.attrib?
+
 }
 
 ##Common attlists
@@ -442,7 +459,7 @@ div
     div
     {
         bld.std.label.attrib =
-            ##Text to be displayed in the attribute.
+            ##Text to be displayed in a control, defining what it means.
             attribute label { text }
             
         bld.std.label-align.attrib =
@@ -473,10 +490,6 @@ div
             [ a:defaultValue = "0" ]
             attribute vscroll { xsd:nonNegativeInteger }
             
-        bld.box.label.attrib =
-            ##The text name to display for the box.
-            attribute label { text }
-
         bld.coll-pane.label.attrib =
             ##The text to display for the collapsible pane.
             attribute label { text }
@@ -485,6 +498,17 @@ div
             ##Whether the pane starts collapsed or not.
             [ a:defaultValue = "false" ]
             attribute collapsed { bld.boolean.data }
+
+        bld.checkbox.states.attrib =
+            ##Defines whether the checkbox is 3 state, and whether the user can select the 3rd
+            ##state.
+            [ a:defaultValue = "two" ]
+            attribute states { "two" | "three" | "three-user" }
+
+        bld.checkbox.default.attrib =
+            ##Specifies the initial state for the checkbox.
+            [ a:defaultValue = "false" ]
+            attribute default { bld.boolean.data | "undef" }
     }
 }
 
