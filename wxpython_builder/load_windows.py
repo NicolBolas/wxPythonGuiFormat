@@ -259,6 +259,54 @@ class WindowElementProcs:
         return self._common_control(elem, wnd)
 
 
+    def radiobox(self, elem):
+        def wnd(self, elem, par, wnd_size):
+            text = require_attrib(elem, "label")
+            
+            style = 0
+            
+            orient = get_attrib(elem, "orient", "vertical")
+            if orient == "horizontal":
+                style += wx.RA_SPECIFY_ROWS
+            elif orient == "vertical":
+                style += wx.RA_SPECIFY_COLS
+            else:
+                raise InvalidAttribValueError(elem, "orient", orient)
+            
+            radios = [require_attrib(radio, "label") for radio in elem]
+
+            box = wx.RadioBox(par,
+                label = text,
+                size = wnd_size,
+                choices = radios,
+                majorDimension = 1,
+                style = style)
+            
+            #Default value may be an integer index or a string name.
+            default = get_attrib(elem, "default", "0")
+            
+            if default.isdigit():
+                test = int(default)
+                if test >= len(radios):
+                    raise InvalidAttribValueError(elem, "default", default)
+                default = test
+            else:
+                test = box.FindString(default)
+                if test == wx.NOT_FOUND:
+                    raise InvalidAttribValueError(elem, "default", default)
+                default = test
+            
+            box.SetSelection(default)
+            
+            bind_window_events(box, self._modules, elem, {
+                "py.action" : wx.EVT_RADIOBOX
+            })
+                
+            return box
+
+        
+        return self._common_control(elem, wnd)
+
     #Containers
     def _process_children(self, elem, par_wnd = None, par_sizer = None):
         """Does the necessary pushing and popping of the 

@@ -199,7 +199,8 @@ div
         bld.ctrl.static-text.elem |
         bld.ctrl.button.elem |
         bld.ctrl.spacer.elem |
-        bld.ctrl.checkbox.elem
+        bld.ctrl.checkbox.elem |
+        bld.ctrl.radiobox.elem
 
     bld.ctrl.static-text.elem =
         ##A wxStaticText control
@@ -234,7 +235,7 @@ div
         bld.std.control.attlist,
         bld.window.layout.attlist,
         bld.std.label.attrib,
-        bld.button.py.action.attrib?
+        bld.std.py.action.attrib?
 
     bld.button.label.model =
         ##Should also include a way to get a bitmap.
@@ -265,8 +266,32 @@ div
         bld.std.label.attrib,
         bld.checkbox.states.attrib?,
         bld.checkbox.default.attrib?,
-        bld.button.py.action.attrib?
+        bld.std.py.action.attrib?
 
+    bld.ctrl.radiobox.elem =
+        element radiobox { bld.ctrl.radiobox.contents }
+    
+    bld.ctrl.radiobox.contents =
+        bld.ctrl.radiobox.attlist,
+        bld.ctrl.radiobox.radio.elem+
+    
+    bld.ctrl.radiobox.attlist =
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.window.layout.attlist,
+        bld.std.label.attrib,
+        bld.radiobox.orient.attrib?,
+        bld.radiobox.default.attrib?,
+        bld.std.py.action.attrib?
+    
+    bld.ctrl.radiobox.radio.elem =
+        element radio { bld.radiobox.radio.contents }
+    
+    bld.radiobox.radio.contents =
+        bld.radiobox.radio.attlist
+    
+    bld.radiobox.radio.attlist =
+        bld.std.label.attrib
 }
 
 ##Common attlists
@@ -393,7 +418,7 @@ div
     {
         bld.box.orient.attrib =
             ##Stacking direction for the box.
-            attribute box.orient { "horizontal" | "vertical" }
+            attribute box.orient { bld.orient.data }
         
         bld.gridsider.columns.attrib =
             ##Number of columns for a grid sizer.
@@ -472,8 +497,8 @@ div
             [a:defaultValue = "center"]
             attribute label-align { bld.align.all.data }
         
-        bld.button.py.action.attrib =
-            ##A Python expression to be invoked when this button is clicked.
+        bld.std.py.action.attrib =
+            ##A Python expression to be invoked when this item is clicked or otherwise actioned.
             attribute py.action { text }
         
         bld.spacer.size.attrib =
@@ -509,6 +534,17 @@ div
             ##Specifies the initial state for the checkbox.
             [ a:defaultValue = "false" ]
             attribute default { bld.boolean.data | "undef" }
+            
+            
+        bld.radiobox.orient.attrib =
+            ##The orientation of this radio box.
+            [ a:defaultValue = "vertical" ]
+            attribute orient { bld.orient.data }
+            
+        bld.radiobox.default.attrib =
+            ##The name or index of the radio option that should be the initial state.
+            [ a:defaultValue = "0" ]
+            attribute default { text }
     }
 }
 
@@ -520,6 +556,8 @@ div
     bld.horiz.align.data = "left" | "right" | "center"
     
     bld.align.all.data = "left" | "right" | "top" | "bottom" | "center"
+    
+    bld.orient.data = "horizontal" | "vertical"
     
     ## XSD's boolean type includes things other than "true" and "false",
     ## so we do it manually.
