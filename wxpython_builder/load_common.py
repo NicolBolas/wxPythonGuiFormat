@@ -20,7 +20,9 @@ def process_elements(procs, element, context):
         if elem.tag[0] == "_":
             raise InvalidElementNameError(elem.tag)
             
+        #`-` and `.` characters in elements become underscores.
         search_name = elem.tag.replace("-", "_")
+        search_name = search_name.replace(".", "_")
 
         proc = getattr(procs, search_name, None)
         if proc:

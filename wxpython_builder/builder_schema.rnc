@@ -1,6 +1,7 @@
 
 datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
 namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+namespace local = ""
 
 #App and main windows.
 div
@@ -200,7 +201,9 @@ div
         bld.ctrl.button.elem |
         bld.ctrl.spacer.elem |
         bld.ctrl.checkbox.elem |
-        bld.ctrl.radiobox.elem
+        bld.ctrl.radiobox.elem |
+        bld.ctrl.text-ctrl.elem |
+        bld.ctrl.py.control.elem
 
     bld.ctrl.static-text.elem =
         ##A wxStaticText control
@@ -292,6 +295,55 @@ div
     
     bld.radiobox.radio.attlist =
         bld.std.label.attrib
+        
+    bld.ctrl.text-ctrl.elem =
+        element text-ctrl { bld.ctrl.text-ctrl.contents }
+        
+    bld.ctrl.text-ctrl.contents =
+        bld.ctrl.text-ctrl.attlist
+    
+    bld.ctrl.text-ctrl.attlist =
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.window.layout.attlist,
+        bld.ctrl.text-ctrl.multiline.attrib?,
+        bld.ctrl.text-ctrl.readonly.attrib?,
+        bld.ctrl.text-ctrl.wrap.attrib?,
+        bld.ctrl.text-ctrl.rich.attrib?,
+        bld.ctrl.text-ctrl.default.attrib?,
+        bld.ctrl.text-ctrl.py.entry.attrib?,
+        bld.ctrl.text-ctrl.py.change.attrib?
+    
+    bld.ctrl.py.control.elem =
+        ##Allows a user to use a Python script to create a custom window from the XML element.
+        element py.control { bld.ctrl.py.control.contents }
+    
+    bld.ctrl.py.control.contents =
+        bld.ctrl.py.control.attlist,
+        bld.ctrl.py.control.model
+
+    bld.ctrl.py.control.attlist =   
+        bld.ctrl.py.control.py.window.attrib,
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.window.layout.attlist,
+        (attribute * - local:* {text})*
+    
+    bld.ctrl.py.control.model =
+        bld.any.contents
+}
+
+##Other models
+div
+{
+    bld.any.elem =
+        element * { bld.any.attrib*, bld.any.contents }
+    
+    bld.any.attrib =
+        attribute * { text }
+    
+    bld.any.contents =
+        bld.any.elem* & text
 }
 
 ##Common attlists
@@ -499,7 +551,7 @@ div
         
         bld.std.py.action.attrib =
             ##A Python expression to be invoked when this item is clicked or otherwise actioned.
-            attribute py.action { text }
+            attribute py.action { bld.py.expression.data }
         
         bld.spacer.size.attrib =
             ##The size for the spacer.
@@ -545,6 +597,42 @@ div
             ##The name or index of the radio option that should be the initial state.
             [ a:defaultValue = "0" ]
             attribute default { text }
+            
+        bld.ctrl.py.control.py.window.attrib =
+            ##Function which returns a window.
+            attribute py.window { bld.py.expression.data }
+
+        bld.ctrl.text-ctrl.multiline.attrib =
+            ##Set to true if it is a multiline edit box.
+            [ a:defaultValue = "false" ]
+            attribute multiline { bld.boolean.data }
+
+        bld.ctrl.text-ctrl.readonly.attrib =
+            ##Set to true to make the box read-only
+            [ a:defaultValue = "false" ]
+            attribute readonly { bld.boolean.data }
+
+        bld.ctrl.text-ctrl.wrap.attrib =
+            ##Set to false to make the box not wordwrap.
+            [ a:defaultVaue = "true" ]
+            attribute wrap { bld.boolean.data }
+
+        bld.ctrl.text-ctrl.rich.attrib =
+            ##Set to true to make the box a rich-edit box.
+            [ a:defaultValue = "false" ]
+            attribute rich { bld.boolean.data }
+
+        bld.ctrl.text-ctrl.default.attrib =
+            ##Specifies text to show at the start of the application.
+            attribute default { text }
+
+        bld.ctrl.text-ctrl.py.entry.attrib =
+            attribute py.entry { bld.py.expression.data }
+
+        bld.ctrl.text-ctrl.py.change.attrib =
+            attribute py.change { bld.py.expression.data }
+
+
     }
 }
 
@@ -558,6 +646,9 @@ div
     bld.align.all.data = "left" | "right" | "top" | "bottom" | "center"
     
     bld.orient.data = "horizontal" | "vertical"
+    
+    ##For any attributes that take a Python expression.
+    bld.py.expression.data = text
     
     ## XSD's boolean type includes things other than "true" and "false",
     ## so we do it manually.

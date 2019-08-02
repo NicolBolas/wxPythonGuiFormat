@@ -161,7 +161,7 @@ class WindowElementProcs:
 
 
     #Controls
-    def _common_control(self, elem, func):
+    def _common_control(self, elem, func, *args, **kwdargs):
         """Performs the common initialization and finalization tasks
         for a control, with the creation of the window being
         farmed out to the given function.
@@ -179,7 +179,7 @@ class WindowElementProcs:
         """
         wnd_size = get_wnd_size_optional(elem)
         
-        wnd = func(self, elem, self._wnd_stack[-1], wnd_size)
+        wnd = func(self, elem, self._wnd_stack[-1], wnd_size, *args, **kwdargs)
 
         self._sizer_stack[-1].Add(wnd, *get_sizer_flags(elem))
         self._finalize_control(wnd, elem)
@@ -306,6 +306,53 @@ class WindowElementProcs:
 
         
         return self._common_control(elem, wnd)
+
+
+    def text_ctrl(self, elem):
+        def wnd(self, elem, par, wnd_size):
+            style = wx.TE_NOHIDESEL
+            
+            if get_attrib_bool(elem, "multiline", False):
+                style += wx.TE_MULTILINE
+            if get_attrib_bool(elem, "readonly", False):
+                style += wx.TE_READONLY
+            if not get_attrib_bool(elem, "wrap", True):
+                style += wx.TE_DONTWRAP
+            if get_attrib_bool(elem, "rich", False):
+                style += wx.TE_RICH + wx.TE_RICH2
+
+            if get_attrib(elem, "py.entry"):
+                style += wx.TE_PROCESS_ENTER
+
+            text_ctrl = wx.TextCtrl(par,
+                size = wnd_size,
+                style = style,
+                value = get_attrib(elem, "default", ""))
+
+            bind_window_events(text_ctrl, self._modules, elem, {
+                "py.entry" : wx.EVT_TEXT_ENTER,
+                "py.change" : wx.EVT_TEXT
+            })
+            
+            return text_ctrl
+    
+        return self._common_control(elem, wnd)
+
+
+    def py_control(self, elem):
+        create_wnd = require_attrib(elem, "py.window")
+        
+        print(create_wnd)
+        
+        create_wnd = eval("lambda elem, par_wnd, wnd_size: " + create_wnd, self._modules)
+        
+        def wnd(self, elem, par, wnd_size, create_wnd):
+            ctrl = create_wnd(elem, par, wnd_size)
+            
+            return ctrl
+        
+        return self._common_control(elem, wnd, create_wnd)
+
 
     #Containers
     def _process_children(self, elem, par_wnd = None, par_sizer = None):
