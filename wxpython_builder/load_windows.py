@@ -339,6 +339,18 @@ class WindowElementProcs:
         return self._common_control(elem, wnd)
 
 
+    def static_line(self, elem):
+        def wnd(self, elem, par, wnd_size):
+            style = wx.LI_VERTICAL if get_attrib(elem, "orient", "horizontal") == "vertical" else wx.LI_HORIZONTAL
+            
+            return wx.StaticLine(par,
+                size = wnd_size,
+                style = style)
+
+        
+        return self._common_control(elem, wnd)
+
+
     def py_control(self, elem):
         create_wnd = require_attrib(elem, "py.window")
         

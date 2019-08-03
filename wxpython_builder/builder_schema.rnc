@@ -203,6 +203,7 @@ div
         bld.ctrl.checkbox.elem |
         bld.ctrl.radiobox.elem |
         bld.ctrl.text-ctrl.elem |
+        bld.ctrl.static-line.elem |
         bld.ctrl.py.control.elem
 
     bld.ctrl.static-text.elem =
@@ -313,7 +314,20 @@ div
         bld.ctrl.text-ctrl.default.attrib?,
         bld.ctrl.text-ctrl.py.entry.attrib?,
         bld.ctrl.text-ctrl.py.change.attrib?
+
+    bld.ctrl.static-line.elem =
+        ##Draws a horizontal or vertical line.
+        element static-line { bld.ctrl.static-line.contents }
     
+    bld.ctrl.static-line.contents =
+        bld.ctrl.static-line.attlist
+
+    bld.ctrl.static-line.attlist =
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.window.layout.attlist,
+        bld.ctrl.static-line.orient.attrib?
+
     bld.ctrl.py.control.elem =
         ##Allows a user to use a Python script to create a custom window from the XML element.
         element py.control { bld.ctrl.py.control.contents }
@@ -328,7 +342,7 @@ div
         bld.std.control.attlist,
         bld.window.layout.attlist,
         (attribute * - local:* {text})*
-    
+
     bld.ctrl.py.control.model =
         bld.any.contents
 }
@@ -632,7 +646,10 @@ div
         bld.ctrl.text-ctrl.py.change.attrib =
             attribute py.change { bld.py.expression.data }
 
-
+        bld.ctrl.static-line.orient.attrib =
+            ##Defines the orientation of the line.
+            [ a:defaultValue = "horizontal" ]
+            attribute orient { bld.orient.data }
     }
 }
 
