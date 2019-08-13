@@ -204,6 +204,8 @@ div
         bld.ctrl.radiobox.elem |
         bld.ctrl.text-ctrl.elem |
         bld.ctrl.static-line.elem |
+        bld.ctrl.spin-ctrl-int.elem |
+        bld.ctrl.spin-ctrl-float.elem |
         bld.ctrl.py.control.elem
 
     bld.ctrl.static-text.elem =
@@ -328,6 +330,42 @@ div
         bld.window.layout.attlist,
         bld.ctrl.static-line.orient.attrib?
 
+    bld.ctrl.spin-ctrl-int.elem =
+        ##Creates an integer spin control.
+        element spin-ctrl-int { bld.ctrl.spin-ctrl-int.contents }
+        
+    bld.ctrl.spin-ctrl-int.contents =
+        bld.ctrl.spin-ctrl-int.attlist
+        
+    bld.ctrl.spin-ctrl-int.attlist =
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.window.layout.attlist,
+        bld.ctrl.spin-ctrl-int.min.attrib?,
+        bld.ctrl.spin-ctrl-int.max.attrib?,
+        bld.ctrl.spin-ctrl-int.default.attrib?,
+        bld.ctrl.spin-ctrl.wrap.attrib?,
+        bld.ctrl.spin-ctrl.py.change.attrib?
+    
+    bld.ctrl.spin-ctrl-float.elem =
+        ##Creates an floating-point spin control.
+        element spin-ctrl-float { bld.ctrl.spin-ctrl-float.contents }
+    
+    bld.ctrl.spin-ctrl-float.contents =
+        bld.ctrl.spin-ctrl-float.attlist
+        
+    bld.ctrl.spin-ctrl-float.attlist =
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.window.layout.attlist,
+        bld.ctrl.spin-ctrl-float.min.attrib?,
+        bld.ctrl.spin-ctrl-float.max.attrib?,
+        bld.ctrl.spin-ctrl-float.default.attrib?,
+        bld.ctrl.spin-ctrl-float.increment.attrib?,
+        bld.ctrl.spin-ctrl.wrap.attrib?,
+        bld.ctrl.spin-ctrl-float.min-digits.attrib?,
+        bld.ctrl.spin-ctrl.py.change.attrib?
+        
     bld.ctrl.py.control.elem =
         ##Allows a user to use a Python script to create a custom window from the XML element.
         element py.control { bld.ctrl.py.control.contents }
@@ -650,6 +688,53 @@ div
             ##Defines the orientation of the line.
             [ a:defaultValue = "horizontal" ]
             attribute orient { bld.orient.data }
+
+        bld.ctrl.spin-ctrl-int.min.attrib =
+            ##Defines the minimum value you can select.
+            [ a:defaultValue = "0" ]
+            attribute min { xsd:integer }
+        
+        bld.ctrl.spin-ctrl-int.max.attrib =
+            ##Defines the maximum value you can select.
+            [ a:defaultValue = "100" ]
+            attribute max { xsd:integer }
+            
+        bld.ctrl.spin-ctrl-int.default.attrib =
+            ##The default value for the spin control, which will be the minimum.
+            attribute default { xsd:integer }
+
+        bld.ctrl.spin-ctrl.wrap.attrib =
+            ##Whether the control wraps around.
+            [ a:defaultValue = "false" ]
+            attribute wrap { bld.boolean.data }
+
+        bld.ctrl.spin-ctrl-float.min.attrib =
+            ##Defines the minimum value you can select.
+            [ a:defaultValue = "0" ]
+            attribute min { xsd:float }
+
+        bld.ctrl.spin-ctrl-float.max.attrib =
+            ##Defines the maximum value you can select.
+            [ a:defaultValue = "100" ]
+            attribute max { xsd:float }
+            
+        bld.ctrl.spin-ctrl-float.default.attrib =
+            ##The default value for the spin control, which will be the minimum.
+            attribute default { xsd:float }
+
+        bld.ctrl.spin-ctrl-float.increment.attrib =
+            ##The multiple by which values go up or down.
+            [ a:defaultValue = "1" ]
+            attribute increment { xsd:float }
+        
+        bld.ctrl.spin-ctrl-float.min-digits.attrib =
+            ##Defines the minimum number of digits to display.
+            [ a:defaultValue = "0" ]
+            attribute min-digits { xsd:nonNegativeInteger }
+            
+        bld.ctrl.spin-ctrl.py.change.attrib =
+            ##Python expression to invoke when the spin control changes.
+            attribute py.change { bld.py.expression.data }
     }
 }
 

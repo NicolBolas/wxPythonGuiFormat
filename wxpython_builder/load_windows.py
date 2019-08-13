@@ -347,6 +347,69 @@ class WindowElementProcs:
                 size = wnd_size,
                 style = style)
 
+        return self._common_control(elem, wnd)
+
+
+    def spin_ctrl_int(self, elem):
+        def wnd(self, elem, par, wnd_size):
+            style = wx.SP_ARROW_KEYS + wx.TE_PROCESS_ENTER
+            
+            min = int(get_attrib(elem, "min", "0"))
+            max = int(get_attrib(elem, "max", "100"))
+            if max <= min:
+                raise SpinMinMaxError(elem, min, max)
+            default = int(get_attrib(elem, "default", min))
+            
+            if get_attrib_bool(elem, "wrap", False):
+                style += wx.SP_WRAP
+            
+            spin = wx.SpinCtrl(par,
+                size = wnd_size,
+                style = style,
+                initial = default,
+                min = min,
+                max = max)
+            
+            bind_window_events(spin, self._modules, elem, {
+                "py.change" : wx.EVT_SPINCTRL
+                })
+
+            return spin
+        
+        return self._common_control(elem, wnd)
+
+
+    def spin_ctrl_float(self, elem):
+        def wnd(self, elem, par, wnd_size):
+            style = wx.SP_ARROW_KEYS
+            
+            min = float(get_attrib(elem, "min", "0"))
+            max = float(get_attrib(elem, "max", "100"))
+            if max <= min:
+                raise SpinMinMaxError(elem, min, max)
+            default = float(get_attrib(elem, "default", min))
+            
+            increment = float(get_attrib(elem, "increment", "1"))
+            
+            if get_attrib_bool(elem, "wrap", False):
+                style += wx.SP_WRAP
+            
+            spin = wx.SpinCtrlDouble(par,
+                size = wnd_size,
+                style = style,
+                initial = default,
+                inc = increment,
+                min = min,
+                max = max)
+                
+            digits = int(get_attrib(elem, "min-digits", "0"))
+            spin.SetDigits(digits)
+            
+            bind_window_events(spin, self._modules, elem, {
+                "py.change" : wx.EVT_SPINCTRLDOUBLE
+                })
+
+            return spin
         
         return self._common_control(elem, wnd)
 
