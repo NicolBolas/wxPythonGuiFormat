@@ -10,6 +10,20 @@ class WxPythonBuilderError(Exception):
         return self.message
 
 
+class MainWindowNameNotFoundError(WxPythonBuilderError):
+    """Raised when a main window frame is specified but not found."""
+    
+    def __init__(self, main_wnd_id):
+        self.message = f"No frame window with the `id` '{main_wnd_id}' was found to become the main window."
+
+
+class MainWindowUnavailableError(WxPythonBuilderError):
+    """Raised when using the `application` function on an `app`
+    that didn't provide a main window."""
+    
+    def __init__(self):
+        self.message = "If the `app` node does not specify a `main-wnd`, and no `frame` is named 'main', then you may not use the `application` function."
+
 class InvalidElementNameError(WxPythonBuilderError):
     """Raised when an element name is not, and never can be, used."""
 

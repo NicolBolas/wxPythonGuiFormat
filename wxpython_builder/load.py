@@ -172,10 +172,11 @@ class _FrameElemProcs:
         return self.panel(elem)
 
 
-class _RootElemProcs:
+class _GroupProcs:
     """
-    Class whose attributes are functions that process elements which are
-    children of the root.
+    Processes the child elements of a `group` or `app` node.
+    The `group` and `app` modules are isolated from one another, but
+    the windows produced by them are not.
     """
 
     def __init__(self):
@@ -208,6 +209,11 @@ class _RootElemProcs:
                     raise ConflictingImportNameError(module_name)
                 self._imports[module_name] = mod
     
+
+    #TODO: Handle `group` elements, isolating them from other
+    #modules, but letting them define frames and dialogs in the
+    #same namespace.
+
     
     def frame(self, elem):
         _aui_default_name_ix = 0
@@ -227,34 +233,44 @@ class _RootElemProcs:
     
 def build_gui(app_element, app):
     """
-    Builds the `Gui` object from the given root XML element, which must be
-    an `app` element.
+    Builds the `Gui` object from `app_element`, which must be
+    an "app" element. `app` is a `wx.App` class instance.
     
-    Any XIncludes are expected to have already been processed.
+    Any XIncludes in the document are expected to have already been processed.
     """
     
     if app_element.tag != "app":
         raise ElementNotSupportedError(app_element, "as the root")
     
-    root_data = process_elements(_RootElemProcs(), app_element,
+    root_data = process_elements(_GroupProcs(), app_element,
         "as the child of the root element")
 
-    #TODO: Generate GUI from `root_data`.
-    
     frame_map = {}
     for id, frame in root_data._frames.items():
         container = GuiContainer(frame._frame, None)
         container._aui = frame._aui
         frame_map[id] = container
-        
+
+    gui = Gui(app, frame_map, main_wnd_id = get_attrib(app_element, "main-wnd"))
     
-    return Gui(app, frame_map)
+    init_func = get_attrib(app_element, "py.init")
+    if init_func:
+        init_func = eval("lambda app, gui: " + init_func, root_data._imports)
+        
+        init_func(app, gui)
+    
+    return gui
 
 
 def load_gui(xml_path, app):
     """
-    Loads the XML file (processing XIncludes), and builds a `Gui` object
-    out of them.
+    Loads the XML file designated by `xml_path`. XIncludes will
+    be processed. `app` must be a `wx.App`.
+    
+    The result is a `Gui` object.
     """
     root = etree.parse(xml_path)
+    
+    #TODO: Process XIncludes.
+    
     return build_gui(root.getroot(), app)

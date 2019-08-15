@@ -3,6 +3,7 @@ Contains a simplified function to load an XML file and start it as an applicatio
 """
 
 from .load import load_gui
+from .exceptions import *
 import wx
 
 def application(xml_path):
@@ -18,7 +19,9 @@ def application(xml_path):
     app = wx.App()
     gui = load_gui(xml_path, app)
     #print("gui loaded")
-    frm = gui.get_frame_wnd("main")
+    if not gui.has_main_wnd():
+        raise MainWindowUnavailableError()
+    frm = gui.get_main_wnd().get_wnd()
     #print("main frame found")
     #print(frm)
     frm.Show()

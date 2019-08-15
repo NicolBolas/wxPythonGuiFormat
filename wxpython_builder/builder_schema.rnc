@@ -19,7 +19,9 @@ div
         bld.module.elem*,
         bld.main-wnds.model+
 
-    bld.app.attlist = empty
+    bld.app.attlist =
+        bld.app.main-wnd.attrib?,
+        bld.app.py.init.attrib?
     
     bld.module.elem =
         ##All children of the parent of this element will
@@ -439,6 +441,21 @@ div
 ## All attributes.
 div
 {
+    bld.app.main-wnd.attrib =
+        ##Specifies the `id` of the `frame` which should be considered the main window for the app.
+        ##If you invoke this system using `application`, then this is the window which will be
+        ##displayed.
+        ##If no `frame` `id` matches this `id`, then an error is produced.
+        ##Not providing a `frame` `id` to match the default will not lead to an error.
+        [ a:defaultValue = "main" ]
+        attribute main-wnd { text }
+
+    bld.app.py.init.attrib =
+        ##Script to run after processing all of the windows in the `app`.
+        ##It is passed the `wx.App` class and the `Gui`, in that order. 
+        ##This script is expected to return before the main loop starts.
+        attribute py.init { bld.py.expression.data }
+        
     bld.module.name.attrib =
         ##Name of the module to import.
         attribute name { text }
