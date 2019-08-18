@@ -14,9 +14,14 @@ class GuiContainer:
         self._wnd_map = wnd_map
         
     
-    def get_wnd(self):
+    def wnd(self):
         """Retrieves the frame/dialog's window object."""
         return self._wnd
+    
+    
+    def get_wnd(self, id):
+        """Retrieves the child window with the matching `id`"""
+        return self._wnd_map[id]
 
 
 class Gui:
@@ -50,7 +55,7 @@ class Gui:
     
     def get_frame_wnd(self, id):
         """Retrieves the WX window for the frame with the matching `id`."""
-        return self._frame_map[id].get_wnd()
+        return self._frame_map[id].wnd()
 
 
     def has_main_wnd(self):

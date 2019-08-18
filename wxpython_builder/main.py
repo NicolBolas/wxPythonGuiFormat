@@ -21,7 +21,7 @@ def application(xml_path):
     #print("gui loaded")
     if not gui.has_main_wnd():
         raise MainWindowUnavailableError()
-    frm = gui.get_main_wnd().get_wnd()
+    frm = gui.get_main_wnd().wnd()
     #print("main frame found")
     #print(frm)
     frm.Show()
