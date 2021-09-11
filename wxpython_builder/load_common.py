@@ -72,6 +72,27 @@ def require_attrib_bool(elem, attrib):
     raise InvalidBooleanAttribute(elem, attrib)
 
 
+def _eval_lambda(lamb, modules, params):
+    return eval(f"lambda {params}: {lamb}", modules)
+
+
+def require_attrib_py(elem, attrib, modules, params):
+    """Retrieves the attribute as an evaluated Python lambda function.
+    `params` is a string containing the parameters, separated by commas."""
+    func = require_attrib(elem, attrib)
+    return _eval_lambda(func, modules, params)
+
+
+def get_attrib_py(elem, attrib, modules, params):
+    """Retrieves the attribute as an evaluated Python lambda function.
+    Returns None if no attribute.
+    `params` is a string containing the parameters, separated by commas."""
+    func = get_attrib(elem, attrib)
+    if func is not None:
+        return _eval_lambda(func, modules, params)
+    return None
+    
+
 def get_wnd_size(elem):
     """Use when size is required."""
     return wx.Size(int(require_attrib(elem, "width")),

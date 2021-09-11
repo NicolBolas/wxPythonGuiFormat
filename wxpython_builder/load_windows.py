@@ -131,6 +131,33 @@ _button_label_align = {
 }
 
 
+class _CustomContainerTools:
+    """Class holding tools for custom container child processing."""
+
+    def __init__(self, wnd_procs):
+        self._wnd_procs = wnd_procs
+
+    
+    def process_children(self, elem, wnd, sizer):
+        """Process the child elements of the given XML element as though
+        they were windows in this builder system. It is given an XML
+        element whose child elements will be processed, a window to make
+        child windows a child of, and a sizer to add child windows to."""
+        return self._wnd_procs._process_children(elem,
+            par_wnd = wnd, par_sizer = sizer)
+
+    
+    def create_sizer(self, elem):
+        """Create a sizer from an XML element that has sizer flags.
+        It raises an exception if inappropriate sizer flags are found."""
+        return create_sizer(elem)
+
+
+    def get_window_size(self, elem):
+        """Get a wx.Size from an XML element that has size information."""
+        return get_wnd_size_optional(elem)
+
+
 class WindowElementProcs:
     def __init__(self, parent_wnd, parent_sizer, modules, insert_wnd_func):
         """
@@ -443,26 +470,14 @@ class WindowElementProcs:
         self._sizer_stack.pop()
 
 
-    def _common_container(self, elem, func):
+    def _common_container(self, elem,
+        create_wnd):
         """Performs the common initialization and finalization tasks
         for a container, including processing the child elements.
-        The creation of the window is farmed out to the given function.
-        
-        This function gets the window size, adds the window to
-        the sizer, adds it to the id map as appropriate, etc.
-        All you need to do is provide a function that returns a window.
-
-        The function must return a window.
-        
-        The given function takes, in order:
-            self
-            the element
-            the parent window
-            the window size
         """
         wnd_size = get_wnd_size_optional(elem)
         
-        wnd = func(self, elem, self._wnd_stack[-1], wnd_size)
+        wnd = create_wnd(self, elem, self._wnd_stack[-1], wnd_size)
 
         self._sizer_stack[-1].Add(wnd, *get_sizer_flags(elem))
         sizer = create_sizer(elem)
@@ -470,6 +485,94 @@ class WindowElementProcs:
         wnd.SetMinSize(wnd_size)
         
         self._process_children(elem, par_wnd = wnd, par_sizer = sizer)
+        self._finalize_control(wnd, elem)
+
+
+    def _common_container2(self, elem,
+        create_wnd,
+        add_to_sizer = None,
+        set_sizer = None,
+        process_children = None,
+        is_custom = False):
+        """Performs the common initialization and finalization tasks
+        for a container, including processing the child elements.
+        
+        This function fetches the window size, creates the window, 
+        adds it to the parent sizer, create a sizer for the window,
+        processes any XML child elements as child windows, and
+        performs finalization tasks for the window.
+        
+        Certain steps can be customized by functions.
+        
+        `create_wnd` creates the wxWidgets window. It takes, in order:
+        * `elem` the element
+        * `par_wnd` the parent window
+        * `size` the window size
+        
+        `add_to_sizer` returns the object to add to the parent sizer.
+        If not provided, then the window is added to the parent.
+        This is used for special cases like `box` needing to add
+        its box-sizer to the parent rather than the window itself.
+        This function takes, in order:
+        * `elem`: the XML element
+        * `wnd`: the window created from `create_wnd`
+        
+        `set_sizer` Sets the created sizer into the window. If not present
+        then `wnd.SetSizer()` will be called to do so. This is useful for
+        things like `wxCollapsablePane`, where the sizer applies to
+        the `wxCollapsablePane.GetPane` rather than the collapsible
+        pane itself.
+        This function takes, in order:
+        * `elem`: the XML element
+        * `wnd`: the window.
+        * `sizer`: the sizer to set into the window.
+        
+        `process_children` Allows user-defined child processing. If not
+        present, then the direct child elements are assumed to be
+        windows and will be processed accordingly. The parent window
+        and parent sizer will be the window and sizer given here.
+        This function takes, in order and with names:
+        * `elem`: the XML element
+        * `par_wnd`: the created window
+        * `par_sizer`: the sizer created for this window, if any.
+        * `tools`: an object containing processing utilities, defined
+        by a _CustomContainerTools instance.
+        """
+        wnd_size = get_wnd_size_optional(elem)
+        
+        wnd = create_wnd(elem, self._wnd_stack[-1], wnd_size)
+
+        if add_to_sizer is not None:
+            obj = add_to_sizer(elem, wnd)
+            self._sizer_stack[-1].Add(obj, *get_sizer_flags(elem))
+        else:
+            self._sizer_stack[-1].Add(wnd, *get_sizer_flags(elem))
+
+        sizer = None
+        try:
+            sizer = create_sizer(elem)
+            if set_sizer:
+                set_sizer(elem, wnd, sizer)
+            else:
+                wnd.SetSizer(sizer)
+        except MissingSizerAttributesError as e:
+            #It's OK if an element has no sizer attributes if:
+            #it is a custom control
+            #it does not have a set_sizer function
+            #it has a process_children function
+            if not(is_custom and set_sizer is None and process_children is not None):
+                raise e
+            
+        wnd.SetMinSize(wnd_size)
+        
+        if process_children is not None:
+            process_children(elem,
+                par_wnd = wnd,
+                par_sizer = sizer,
+                tools = _CustomContainerTools(self))
+        else:
+            self._process_children(elem, par_wnd = wnd, par_sizer = sizer)
+
         self._finalize_control(wnd, elem)
 
 
@@ -542,8 +645,15 @@ class WindowElementProcs:
             style = wx.CP_DEFAULT_STYLE + wx.CP_NO_TLW_RESIZE)
 
         self._sizer_stack[-1].Add(wnd, *get_sizer_flags(elem))
+        
+        #The reason why we cannot use `_common_container` is this:
+        #we need to set the sizer to `wnd.GetPane()`, not `wnd`
+        #itself, which is the window we would return.
+        #Also, child windows need to be children of `wnd.GetPane()`,
+        #not to `wnd` itself.
         sizer = create_sizer(elem)
         wnd.GetPane().SetSizer(sizer)
+
         wnd.SetMinSize(wnd_size)
         
         self._process_children(elem,
@@ -561,3 +671,54 @@ class WindowElementProcs:
         
         wnd.Bind(wx.EVT_COLLAPSIBLEPANE_CHANGED, evt)
 
+
+    def py_container(self, elem):
+        """
+        Processes a container whose window and XML processing can be
+        customized.
+        
+        # Custom container interfaces:
+        * `py.window`: Creates the window itself. Required.
+        Event binding can happen here.
+        * `py.set-sizer`: Sets a sizer into the window. Optional.
+        Only attempted to be called if the XML element contains sizer
+        attributes. If there are sizer attributes and this attribute
+        is not present, then `wnd.SetSizer` will be used.
+        If this returns `False`, and there are sizer attributes,
+        an exception is raised.
+        This is useful for things like wxCollapsiblePane, where the sizer
+        should be placed in the `wxCollapsiblePane::GetPane()`
+        window.        
+        * `py.child-windows`: Allows custom child processing. Optional.
+        When specified, this function is given the window, XML element,
+        and various tools. It is expected to go through the XML child
+        elements and build whatever windows, using the tools listed below.
+        
+        If this attribute is not specified, and the window has sizer
+        attributes, then the system will assume that all
+        XML element children are child windows, to be attached as
+        children of this window and its sizer.
+        
+        So if you don't want to have your window contain any child 
+        windows... well,
+        you should have used `py.control`. But you can just set this
+        attribute to a `"False"`-valued lambda.
+        """
+        py_window = require_attrib_py(elem, "py.window", self._modules,
+            "elem, par_wnd, size")
+        
+        py_set_sizer = get_attrib_py(elem, "py.set-sizer", self._modules,
+            "elem, wnd, sizer")
+        
+        py_child_windows = get_attrib_py(elem, "py.child-windows",
+            self._modules, "elem, par_wnd, par_sizer, tools")
+        
+        return self._common_container2(elem,
+            create_wnd = py_window,
+            set_sizer = py_set_sizer,
+            process_children = py_child_windows,
+            is_custom = True)
+        
+
+
+        

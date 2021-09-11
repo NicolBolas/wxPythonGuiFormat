@@ -122,7 +122,8 @@ div
         bld.cont.pane.elem |
         bld.cont.scroll-window.elem |
         bld.cont.box.elem |
-        bld.cont.coll-pane.elem
+        bld.cont.coll-pane.elem |
+        bld.cont.py.container.elem
     
     bld.cont.sizer.elem =
         ##A non-window sizer, which can contain other windows.
@@ -192,7 +193,25 @@ div
         bld.window.layout.attlist,
         bld.sizer.attlist,
         bld.coll-pane.label.attrib,
-        bld.coll-pane.collapsed.attrib?        
+        bld.coll-pane.collapsed.attrib?
+
+    bld.cont.py.container.elem =
+        ##A custom container defined by a Python script.
+        element py.container { bld.cont.py.container.contents }
+        
+    bld.cont.py.container.contents =
+        bld.cont.py.container.attlist,
+        bld.any.contents
+        
+    bld.cont.py.container.attlist =
+        bld.py.container.py.window.attrib,
+        bld.py.container.py.set-sizer.attrib?,
+        bld.py.container.py.child-windows.attrib?,
+        bld.std.window.attlist,
+        bld.std.control.attlist,
+        bld.window.layout.attlist,
+        bld.sizer.attlist?,
+        bld.any.non-local.attrib*
 }
 
 ##Control windows
@@ -381,7 +400,7 @@ div
         bld.std.window.attlist,
         bld.std.control.attlist,
         bld.window.layout.attlist,
-        (attribute * - local:* {text})*
+        bld.any.non-local.attrib*
 
     bld.ctrl.py.control.model =
         bld.any.contents
@@ -398,6 +417,9 @@ div
     
     bld.any.contents =
         bld.any.elem* & text
+        
+    bld.any.non-local.attrib =
+        (attribute * - local:* {text})
 }
 
 ##Common attlists
@@ -622,6 +644,25 @@ div
             ##A Python expression to be invoked when this item is clicked or otherwise actioned.
             attribute py.action { bld.py.expression.data }
         
+        bld.py.container.py.window.attrib =
+            ##Function which builds a window for a custom container.
+            attribute py.window { bld.py.expression.data }
+
+        bld.py.container.py.set-sizer.attrib =
+            ##Function which takes the previously-built custom container window and a
+            ##sizer, and sets the sizer into the window.
+            ##This is useful for things like wxCollapsiblePane, where the sizer should be placed
+            ##in the `wxCollapsiblePane::GetPanel()` window.
+            ##If this is not present, and sizer attributes are on the element, then `SetSizer`
+            ##will be used. If this is present, and there are no sizer attributes, an error occurs.
+            attribute py.set-sizer { bld.py.expression.data }
+            
+        bld.py.container.py.child-windows.attrib =
+            ##Function to override the default processing of child XML elements.
+            ##If not present, then child XML elements are treated as windows.
+            attribute py.child-windows { bld.py.expression.data }
+
+
         bld.spacer.size.attrib =
             ##The size for the spacer.
             attribute size { xsd:nonNegativeInteger }
@@ -668,9 +709,9 @@ div
             attribute default { text }
             
         bld.ctrl.py.control.py.window.attrib =
-            ##Function which returns a window.
+            ##Function which returns a window for a custom control.
             attribute py.window { bld.py.expression.data }
-
+            
         bld.ctrl.text-ctrl.multiline.attrib =
             ##Set to true if it is a multiline edit box.
             [ a:defaultValue = "false" ]
